@@ -1,6 +1,6 @@
 import { ipfsAxios } from "./common";
 
-type IpfsPin = {
+export type IpfsPin = {
   cid: string;
   name: string;
   allocations: string[];

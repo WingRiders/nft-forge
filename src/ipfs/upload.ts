@@ -1,6 +1,6 @@
 import { ipfsAxios } from "./common";
 
-type IpfsUploadResponse = {
+export type IpfsUploadResponse = {
   name: string;
   cid: string;
   size: number;
