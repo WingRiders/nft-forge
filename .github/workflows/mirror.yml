@@ -1,3 +1,5 @@
+name: Mirror commits
+
 on:
   push:
     branches:
