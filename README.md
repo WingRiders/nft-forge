@@ -16,6 +16,16 @@ Architecture of the project can be found in the [architecture.md](./docs/archite
 
 This project uses [Bun](https://bun.sh/). If you don't have Bun installed, you can follow the installation guide on their website.
 
+### Environment variables
+
+Make sure you have correct environment variables set in `.env` (all required values are in `.env.example`). If you want to run the application without the IPFS functionality, you can copy the example environment variables:
+
+```
+cp .env.example .env
+```
+
+For using the IPFS, you need to setup an IPFS provider and set connection to it in the environment variables.
+
 ### Installing dependencies
 
 ```
