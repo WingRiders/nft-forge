@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
-import { IpfsUploadResponse, uploadFileToIpfs } from "../../src/ipfs/upload";
+import { IpfsUploadResponse } from "../../src/ipfs/types";
+import { createIpfsProvider } from "./mocks";
 
 describe("IPFS upload", () => {
   test("Upload a file", async () => {
@@ -10,21 +11,26 @@ describe("IPFS upload", () => {
       allocations: [],
     };
 
-    mock.module("../../src/ipfs/common", () => {
+    mock.module("axios", () => {
       return {
-        ipfsAxios: {
-          post: (endpoint: string) => {
-            if (endpoint === "/add")
-              return Promise.resolve({
-                data: mockedResponse,
-              });
-            return Promise.resolve({ data: {} });
+        default: {
+          create: () => {
+            return {
+              post: (endpoint: string) => {
+                if (endpoint === "/add")
+                  return Promise.resolve({
+                    data: mockedResponse,
+                  });
+                return Promise.resolve({ data: {} });
+              },
+            };
           },
         },
       };
     });
 
-    const response = await uploadFileToIpfs({} as File);
+    const ipfsProvider = createIpfsProvider();
+    const response = await ipfsProvider.upload({} as File);
     expect(response).toEqual(mockedResponse);
   });
 });

@@ -1,5 +1,5 @@
+import { ipfsProvider } from "../../../../config";
 import { isFileImage } from "../../../../helpers/file";
-import { uploadFileToIpfs } from "../../../../ipfs/upload";
 
 export const POST = async (request: Request) => {
   let formData: FormData | undefined = undefined;
@@ -24,7 +24,7 @@ export const POST = async (request: Request) => {
     );
 
   try {
-    const res = await uploadFileToIpfs(file);
+    const res = await ipfsProvider.upload(file);
 
     return Response.json({
       name: res.name,

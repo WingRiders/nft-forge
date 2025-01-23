@@ -1,6 +1,6 @@
-import { getAllIpfsPins } from "../../../../ipfs/pins";
+import { ipfsProvider } from "../../../../config";
 
 export const GET = async () => {
-  const pins = await getAllIpfsPins();
+  const pins = await ipfsProvider.pins();
   return Response.json(pins.map((pin) => pin.cid).sort());
 };

@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
-import { getAllIpfsPins, IpfsPin } from "../../src/ipfs/pins";
+import { IpfsPin } from "../../src/ipfs/types";
+import { createIpfsProvider } from "./mocks";
 
 describe("IPFS pins", () => {
   test("Get all pins", async () => {
@@ -33,23 +34,28 @@ describe("IPFS pins", () => {
       },
     ];
 
-    mock.module("../../src/ipfs/common", () => {
+    mock.module("axios", () => {
       return {
-        ipfsAxios: {
-          get: (endpoint: string) => {
-            if (endpoint === "/pins")
-              return Promise.resolve({
-                data:
-                  mockedPins.map((pin) => JSON.stringify(pin)).join("\n") +
-                  "\n",
-              });
-            return Promise.resolve({ data: {} });
+        default: {
+          create: () => {
+            return {
+              get: (endpoint: string) => {
+                if (endpoint === "/pins")
+                  return Promise.resolve({
+                    data:
+                      mockedPins.map((pin) => JSON.stringify(pin)).join("\n") +
+                      "\n",
+                  });
+                return Promise.resolve({ data: {} });
+              },
+            };
           },
         },
       };
     });
 
-    const pins = await getAllIpfsPins();
+    const ipfsProvider = createIpfsProvider();
+    const pins = await ipfsProvider.pins();
     expect(pins).toEqual(mockedPins);
   });
 });

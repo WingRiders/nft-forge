@@ -126,6 +126,12 @@ In order to connect to your IPFS service provider from the Next.js server, you n
 
 Any IPFS service provider can be used, as long as it supports [the standard IPFS cluster API](https://ipfscluster.io/documentation/reference/api/).
 
+#### Mocked IPFS service provider
+
+If one or more of the `IPFS_*` environment variables are not provided, the Next.js server will default to using a mocked IPFS service provider. When files are uploaded using the mocked IPFS service provider, a correct response will be returned when uploading file (including the accurately calculated `cid`), but the file itself will not be stored anywhere. Only the `cid`s of the uploaded files will be saved, and these will be returned when the `/pins` endpoint is called.
+
+This approach allows for easy running and testing of the Next.js server without needing to configure an actual IPFS service provider.
+
 ### WingRiders IPFS service provider
 
 #### Components

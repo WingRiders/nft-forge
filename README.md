@@ -18,13 +18,13 @@ This project uses [Bun](https://bun.sh/). If you don't have Bun installed, you c
 
 ### Environment variables
 
-Make sure you have correct environment variables set in `.env` (all required values are in `.env.example`). If you want to run the application without the IPFS functionality, you can copy the example environment variables:
+Make sure you have correct environment variables set in `.env` (all required values are in `.env.example`). If you want to run the application with mocked IPFS service provider, you can copy the example environment variables:
 
 ```
 cp .env.example .env
 ```
 
-For using the IPFS, you need to setup an IPFS provider and set connection to it in the environment variables.
+For using your own IPFS, you need to setup an IPFS provider and set connection to it in the environment variables. You can find more information about the configuration of the IPFS service provider in [Connecting to the IPFS service provider](./docs/architecture.md#connecting-to-the-ipfs-service-provider).
 
 ### Installing dependencies
 
