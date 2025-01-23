@@ -1,11 +1,11 @@
-import { z } from "zod";
-import { IpfsProvider } from "./ipfs/provider";
-import { MockedIpfsProvider } from "./ipfs/mockedProvider";
+import {z} from 'zod'
+import {MockedIpfsProvider} from './ipfs/mockedProvider'
+import {IpfsProvider} from './ipfs/provider'
 
 const envSchema = z.object({
   NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   // if IPFS_* variables are not provided, the server will use the mocked IPFS provider
   IPFS_PROTOCOL: z.string().optional(),
   IPFS_HOST: z.string().optional(),
@@ -14,30 +14,30 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((val, ctx) => {
-      if (!val) return undefined;
-      const [username, password] = val.split(":");
+      if (!val) return undefined
+      const [username, password] = val.split(':')
       if (!username || !password) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "IPFS_AUTH should be in the format username:password",
-        });
-        return z.NEVER;
+          message: 'IPFS_AUTH should be in the format username:password',
+        })
+        return z.NEVER
       }
-      return { username, password };
+      return {username, password}
     }),
-});
+})
 
-const parsedEnv = envSchema.safeParse(process.env);
+const parsedEnv = envSchema.safeParse(process.env)
 
 if (!parsedEnv.success) {
   console.error(
-    "Environment variables validation failed",
-    parsedEnv.error.format()
-  );
-  process.exit(1);
+    'Environment variables validation failed',
+    parsedEnv.error.format(),
+  )
+  process.exit(1)
 }
 
-export const config = parsedEnv.data;
+export const config = parsedEnv.data
 
 export const ipfsProvider =
   config.IPFS_PROTOCOL &&
@@ -52,4 +52,4 @@ export const ipfsProvider =
           auth: config.IPFS_AUTH,
         },
       })
-    : new MockedIpfsProvider();
+    : new MockedIpfsProvider()
