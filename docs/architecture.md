@@ -1,16 +1,22 @@
 # NFT Forge Architecture
 
-This project utilizes [Next.js](https://nextjs.org/), a full-stack React framework. We chose Next.js because the project requires only a few backend endpoints, which can be deployed on the same server as the frontend application. Additionally, Next.js simplifies frontend development and deployment. The whole Next.js project is written in TypeScript.
+This project is built using [Next.js](https://nextjs.org/), a full-stack React framework. Next.js was selected because it provides an efficient way to develop both frontend and backend functionalities within a single framework. Deploying backend endpoints together with the frontend application on the same server simplifies deployment and reduces infrastructure complexity.
+
+Additionally, Next.js offers several features that streamline frontend development, including its intuitive routing system and support for server-side rendering. The entire codebase is written in TypeScript, ensuring better type safety, improved code maintainability, and a smoother development experience.
 
 ## Components
 
-This repository contains a Next.js project that handles both the frontend and backend. The main components are:
+This repository contains a Next.js project that serves as the core of the application, handling both the frontend and backend components in a unified architecture. The structure is designed to maximize efficiency and simplify integration between various parts of the system. The main components of this architecture are:
 
-1. **Next.js server**, which includes:
-   1. **Backend API** - communicates with the IPFS server and the frontend application
-   2. **Frontend Application Server** - delivers data to the frontend application
-2. **Frontend application** running in the browser - communicates with the Next.js server
-3. **IPFS service provider** - interacts with the backend API. This is not part of this project and must be set up separately. More details can be found in the [IPFS system design](#ipfs-system-design) section
+1. **Next.js server**: server where the Next.js application is running. It includes:
+
+   1. **Backend API**  
+      This module is responsible for managing the interactions between the frontend application and external services. It acts as a bridge to communicate with the IPFS server, ensuring smooth data flow and enabling the storage and retrieval of NFT images on the decentralized storage network.
+
+2. **IPFS service provider**  
+   This external component is tasked with handling operations related to IPFS (InterPlanetary File System). While it is not included as part of this repository, it plays a critical role in storing and retrieving images for the NFTs. The backend API integrates with this service provider to facilitate these interactions. Detailed information on how the IPFS service provider is configured and used can be found in the [IPFS system design](#ipfs-system-design) section.
+
+By structuring the repository this way, the project ensures a clear separation of concerns and allows for easy scalability and maintainability. While the Next.js server forms the core of the application, the flexibility to integrate with external services like IPFS allows the system to take full advantage of decentralized storage solutions without complicating the core repository.
 
 ### Components visualization
 
@@ -43,21 +49,27 @@ architecture-beta
 
 ## Backend API
 
-The backend API is part of the Next.js server and it's written in TypeScript. It provides the following REST endpoints under the `/api` route:
+The backend API is integrated into the Next.js server and is entirely written in TypeScript. This ensures type safety, better maintainability, and a more reliable development process. The API serves as the backend interface for handling critical operations and is designed to efficiently manage requests between the frontend application and external services. It provides the following REST endpoints, all accessible under the `/api` route:
 
 ### `/ipfs/upload`
 
+This endpoint is responsible for uploading the provided file to the IPFS storage system. When a file is uploaded, it is automatically pinned to ensure it remains accessible within the IPFS network. One of the key features of IPFS is its content-addressed storage mechanism, which prevents duplicate data storage. If a file with identical content has already been uploaded to IPFS, the system will not store a duplicate copy. Instead, it will return the `cid` (Content Identifier) of the previously uploaded file. This approach ensures efficient use of storage resources while maintaining seamless accessibility of the file through its unique `cid`.
+
 #### Arguments
 
-Form data with a `file` entry containing the file to be uploaded. Only image files are supported. A file is considered an image if its MIME type begins with `image`. The MIME type is detected by checking the file's _magic number_.
+The endpoint expects form data that includes a `file` entry containing the image file to be uploaded. Only image files are supported to ensure compatibility with the intended use case. A file is classified as an image if its MIME type starts with `image`, such as `image/png` or `image/jpeg`.
+
+To determine the MIME type of the file, the system checks the file's _magic number_, a sequence of bytes at the beginning of the file that identifies its format. This method ensures that the file's type is accurately detected, even if the file extension has been altered. By relying on the magic number, the endpoint adds an additional layer of validation, ensuring that only legitimate image files are processed and uploaded.
 
 #### Returned data
 
-A JSON object with the following fields:
+The response from this endpoint is a JSON object containing essential information about the uploaded file. This object includes the following fields:
 
-- `name`: name of the uploaded file
-- `size`: size of the uploaded file
-- `cid`: identifier (Content ID) of the uploaded file
+- **`name`**: the name of the file that was uploaded. This value reflects the original filename provided in the upload request, allowing users to identify the file easily
+
+- **`size`**: the size of the uploaded file, measured in bytes. This provides a clear indication of the file's storage requirements and ensures transparency about the file's dimensions
+
+- **`cid`**: the Content Identifier (CID) associated with the uploaded file in the IPFS system. This unique identifier is generated based on the file's content using IPFS's content-based addressing. It serves as a permanent reference to the file, enabling retrieval from the IPFS network without relying on traditional location-based storage paths
 
 **Example response:**
 
@@ -71,13 +83,24 @@ A JSON object with the following fields:
 
 #### Errors
 
-- **400:** `Invalid form data` - form data is missing or invalid
-- **400:** `File not provided` - form data is present, but the `file` entry is missing
-- **400:** `Invalid file` - provided content is not a valid file
-- **400:** `Invalid file type (only images are supported)` - provided file is not an image
-- **500:** `Failed to upload file` - upload failed due to an unexpected server error
+- **400: `Invalid form data`**  
+  This error indicates that the request's form data is either missing entirely or does not conform to the expected format. Properly structured form data is required to process the upload
+
+- **400: `File not provided`**  
+  This error is returned when the form data is present, but the required `file` entry is missing. The `file` entry is mandatory for the upload operation to proceed
+
+- **400: `Invalid file`**  
+  This error signifies that the uploaded content is not recognized as a valid file. This may occur if the provided data is corrupted or improperly encoded
+
+- **400: `Invalid file type (only images are supported)`**  
+  The provided file does not meet the requirement of being an image. Only files with a MIME type that begins with `image` are allowed. Non-image files will trigger this error
+
+- **500: `Failed to upload file`**  
+  This error indicates that the upload process encountered an unexpected server issue. It could result from internal errors, connectivity problems with the IPFS service, or other unforeseen conditions
 
 ### `/ipfs/pins`
+
+This endpoint provides a list of `cid`s (Content Identifiers) for all files that are currently pinned in the IPFS storage connected to the Next.js server. Pinning ensures that specific files remain available within the IPFS network by preventing them from being garbage collected. By returning the `cid`s of pinned files, this endpoint allows users or applications to identify and access all files actively maintained in the connected IPFS storage.
 
 #### Arguments
 
@@ -85,7 +108,7 @@ _No arguments._
 
 #### Returned data
 
-An array of IDs representing all pinned files in the IPFS storage.
+The response from this endpoint is a JSON array of IDs representing all pinned files in the IPFS storage.
 
 **Example Response:**
 
@@ -103,42 +126,72 @@ _No errors._
 
 ### Scalability
 
-The scalability of the backend API largely depends on the configuration of your infrastructure. To handle increased traffic, you can deploy multiple instances of the Next.js server, such as through Docker containers. Implementing a load balancer is essential to distribute incoming traffic evenly across these instances, ensuring optimal performance and reliability.
+The scalability of the backend API is closely tied to the configuration and deployment of your infrastructure. To accommodate increased traffic and ensure seamless performance, the Next.js server can be deployed in multiple instances. These instances can be containerized using tools such as Docker, which allows for consistent and portable deployments across various environments.
 
-For detailed guidance on setting up and configuring these components, refer to the documentation provided by your infrastructure provider.
+To efficiently manage these instances and maintain optimal performance, implementing a load balancer is crucial. A load balancer evenly distributes incoming requests across all active server instances, preventing any single instance from becoming a bottleneck. This setup not only enhances the reliability of the system by reducing the risk of downtime due to server overload but also improves the overall user experience by ensuring faster response times during high-traffic periods.
+
+For step-by-step guidance on deploying multiple instances, configuring a load balancer, and optimizing your infrastructure for scalability, consult the official documentation provided by your infrastructure provider. This documentation will typically include best practices for deploying containerized applications, setting up load balancing, and monitoring system performance to ensure smooth operations as your traffic grows.
 
 ## IPFS system design
 
-The InterPlanetary File System (IPFS) is used as a database system for storing NFT images. WingRiders IPFS service provider is set up for this project and can be used by the WingRiders instance of the Next.js server. If you want to run your own Next.js server, you need to set up your own IPFS service provider.
+The InterPlanetary File System (IPFS) is utilized as a decentralized storage system for managing NFT images. Unlike traditional databases, IPFS provides a distributed network where files are stored and identified using unique Content Identifiers (CIDs). This approach ensures that NFT images are securely stored and efficiently retrieved, offering a robust and scalable solution for decentralized applications.
 
-### Authentication
+If you plan to run your own Next.js server, it is essential to set up your own IPFS service provider to handle the storage and retrieval of files. This service will act as the backend storage layer, integrating with the Next.js server to enable seamless file uploads, pinning, and access to stored content.
 
-The Next.js server is configured to work with an IPFS gateway that requires authentication. To enable this, set the `IPFS_AUTH` environment variable in the Next.js server with your IPFS gateway's username and password, separated by `:` (`username:password`). The backend API will use these credentials to perform basic authentication when communicating with the IPFS gateway.
+To simplify the setup process, you can refer to the [WingRiders IPFS service provider](#wingriders-ipfs-service-provider) as an example. This example provides insights into configuring and deploying an IPFS service provider, including best practices for ensuring reliability, scalability, and integration with your application. By following this example, you can establish a self-sufficient IPFS service that supports your NFT platform.
 
 ### Connecting to the IPFS service provider
 
-In order to connect to your IPFS service provider from the Next.js server, you need to set up these environment variables:
+To establish a connection between your Next.js server and your IPFS service provider, you need to configure the Next.js server with specific environment variables. These variables define the connection details and authentication credentials required to communicate with the IPFS service. Below is a list of the environment variables you need to set up:
 
-- `IPFS_PROTOCOL` - e.g. `https`
-- `IPFS_HOST` - e.g. `localhost`
-- `IPFS_PORT` - e.g. `9094`
-- `IPFS_AUTH` - username and password separated by `:`, e.g. `wingriders:password`
+- **`IPFS_PROTOCOL`**: specifies the communication protocol used to connect to the IPFS service provider. Common values include `https` for secure connections or `http` for local or non-secure setups
 
-Any IPFS service provider can be used, as long as it supports [the standard IPFS cluster API](https://ipfscluster.io/documentation/reference/api/).
+- **`IPFS_HOST`**: the hostname or IP address of the IPFS service provider. For example, `localhost` can be used when running the service locally
 
-#### Mocked IPFS service provider
+- **`IPFS_PORT`**: the port on which the IPFS service is accessible. Ensure this port is open and properly configured in your network settings. For example, `9094`
 
-If one or more of the `IPFS_*` environment variables are not provided, the Next.js server will default to using a mocked IPFS service provider. When files are uploaded using the mocked IPFS service provider, a correct response will be returned when uploading file (including the accurately calculated `cid`), but the file itself will not be stored anywhere. Only the `cid`s of the uploaded files will be saved, and these will be returned when the `/pins` endpoint is called.
+- **`IPFS_AUTH`**: the credentials required for authenticating with the IPFS service provider. This should be in the format of `username:password`. For example, `user123:securepass`
 
-This approach allows for easy running and testing of the Next.js server without needing to configure an actual IPFS service provider.
+By setting these variables, the Next.js server can connect to any IPFS service provider that complies with [the standard IPFS cluster API](https://ipfscluster.io/documentation/reference/api/). This ensures compatibility with a wide range of IPFS implementations, allowing you the flexibility to choose or deploy an IPFS service provider that meets your specific requirements.
 
-### WingRiders IPFS service provider
+Make sure to store these credentials securely, such as using environment variable management tools or encrypted secrets storage, to prevent unauthorized access to your IPFS service.
 
-#### Components
+### Authentication
 
-1. **Core IPFS service** - orchestrates the IPFS functionality
-2. **HTTP gateway** - serves as a bridge between the IPFS service and other systems, such as the Next.js backend API
-3. **Filesystem** - provides storage for IPFS files. It is mounted across all availability zones (AZs), and uploaded files are automatically pinned. The filesystem is backed up and has a sufficiently long retention policy
+The Next.js server is designed to integrate seamlessly with an IPFS service provider that requires authentication for secure communication. To enable this functionality, you need to configure the `IPFS_AUTH` environment variable on the Next.js server. This variable should contain the authentication credentials for your IPFS gateway, formatted as `username:password`. For example, if the username is `user123` and the password is `securepass`, the variable should be set as `IPFS_AUTH=user123:securepass`.
+
+When the backend API communicates with the IPFS gateway, it automatically includes these credentials to perform basic authentication. This ensures that all requests to the IPFS gateway are authorized and secure, enabling operations such as file uploads, retrieval, and pinning without interruptions.
+
+It is important to store the `IPFS_AUTH` credentials securely to prevent unauthorized access. Consider using environment variable management tools, encrypted secrets storage, or a secure configuration service to safeguard these sensitive details. Properly setting up the authentication not only protects your IPFS resources but also ensures reliable connectivity between the Next.js server and the IPFS gateway.
+
+### Mocked IPFS service provider
+
+If one or more of the `IPFS_*` environment variables are not provided, the Next.js server automatically defaults to using a mocked IPFS service provider. This mock implementation is designed to simulate interactions with a real IPFS service, enabling the server to function without requiring an actual IPFS setup during development or testing.
+
+When files are uploaded using the mocked IPFS service provider, the server responds as if the operation were successful. The response includes all the expected details, such as the accurately calculated `cid` (Content Identifier) for the uploaded file. However, the file itself is not stored anywhere. Instead, only the generated `cid`s of the uploaded files are saved temporarily in memory. These `cid`s can be retrieved through the `/pins` endpoint, allowing you to simulate file management and retrieval without interacting with a real IPFS network.
+
+This approach is particularly useful during the development and testing phases, as it allows for easy running and testing of the Next.js server without needing to configure an actual IPFS service provider. By decoupling the server from external dependencies in this way, developers can focus on building and refining the application logic before integrating with production-ready infrastructure.
+
+# WingRiders IPFS service provider
+
+To facilitate development of this project, a dedicated WingRiders IPFS service provider was set up specifically for the Wingriders instance of the Next.js server. This setup demonstrates how the project can function with a fully operational IPFS service provider in a real-world scenario.
+
+The WingRiders instance of the Next.js server communicates with this IPFS service provider exclusively through a private VPC (Virtual Private Cloud) connection. This private connection ensures that the WingRiders IPFS service provider can only be accessed by the WingRiders instance of the Next.js server. External access to the IPFS service is entirely restricted, making it impossible for other instances or projects to utilize this provider.
+
+It is important to note that the WingRiders IPFS service provider is designed solely for WingRiders’ internal use and is not intended for general-purpose deployment. Projects using this open-source repository must set up and configure their own IPFS service provider to handle storage and retrieval of files. The WingRiders setup serves only as an example of how to setup the IPFS service.
+
+Below is a brief description of the WingRiders IPFS service provider architecture.
+
+## Components
+
+1. **Core IPFS Service**  
+   The core IPFS service is the central component responsible for orchestrating the primary IPFS functionality. It handles file storage, retrieval, and the generation of Content Identifiers (CIDs). This service ensures that uploaded files are properly distributed across the IPFS network, providing the foundational infrastructure for decentralized file management.
+
+2. **HTTP Gateway**  
+   The HTTP gateway acts as a crucial bridge between the IPFS service and external systems, such as the Next.js backend API. It enables seamless communication by exposing a standard HTTP interface that other systems can interact with. This gateway ensures that requests for uploading, retrieving, and managing files are processed efficiently, serving as the main entry point to the IPFS service for the Next.js application.
+
+3. **Filesystem**  
+   The filesystem provides robust and scalable storage for files managed by the IPFS service. This storage is mounted across all availability zones (AZs), ensuring high availability and fault tolerance. Files uploaded to the IPFS service are automatically pinned to maintain accessibility within the network. To safeguard data integrity, the filesystem is regularly backed up and adheres to a retention policy that ensures files are preserved for a sufficiently long duration. This setup guarantees both the reliability of file storage and the long-term accessibility of pinned content.
 
 ```mermaid
 architecture-beta
@@ -151,15 +204,20 @@ architecture-beta
   ipfs_core:R -- L:ipfs_api
 ```
 
-#### Technologies
+## Technologies
 
-The WingRiders IPFS service provider is deployed on AWS and uses the following technologies:
+The WingRiders IPFS service provider is deployed on AWS, leveraging cloud-native technologies to ensure scalability, reliability, and ease of management. It utilizes the following key technologies to implement its IPFS functionality:
 
-- [ipfs-cluster](https://github.com/ipfs-cluster/ipfs-cluster) as the core IPFS service
-- [ipfs-kubo](https://github.com/ipfs/kubo) as the HTTP gateway
+- **[ipfs-cluster](https://github.com/ipfs-cluster/ipfs-cluster)**: This serves as the core IPFS service, managing the distribution, pinning, and coordination of files across the cluster. It provides robust features for managing large datasets and ensures that files remain accessible within the IPFS network.
 
-Both services run within a single ECS service. For redundancy, the service is deployed across multiple availability zones, with one instance running in each zone to ensure high availability and fault tolerance.
+- **[ipfs-kubo](https://github.com/ipfs/kubo)**: This acts as the HTTP gateway, enabling seamless interaction between the IPFS service and external systems, including the Next.js backend API. The gateway provides a standard HTTP interface for uploading, retrieving, and managing files within the IPFS network.
 
-#### Scalability
+Both of these services are deployed as part of a single **ECS (Elastic Container Service)** service, which simplifies orchestration and management. For redundancy and fault tolerance, the ECS service is configured to run across multiple AWS availability zones (AZs). Each availability zone hosts one instance of the service, ensuring that the IPFS service provider remains highly available even in the event of a failure in a specific zone.
 
-The Next.js server managed by WingRiders is connected to the IPFS gateway through VPC peering. A load balancer is employed to route and distribute traffic dynamically based on demand, ensuring efficient resource utilization and scalability.
+This multi-AZ deployment architecture not only enhances the reliability and uptime of the service but also provides resilience against regional disruptions, making it a robust and scalable solution for managing IPFS-based file storage.
+
+## Scalability
+
+To handle varying levels of demand and ensure optimal performance, a **load balancer** is employed. The load balancer dynamically routes incoming traffic to the appropriate instances of the IPFS gateway, distributing requests evenly across the infrastructure. This mechanism ensures that resources are utilized efficiently and prevents any single instance from becoming overwhelmed during periods of high traffic.
+
+In addition to enhancing scalability, the load balancer contributes to system reliability by detecting unresponsive instances and redirecting traffic to healthy ones. This setup allows the WingRiders Next.js server to maintain consistent performance and high availability, even under fluctuating load conditions or potential infrastructure failures.
