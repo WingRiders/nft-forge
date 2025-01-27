@@ -1,5 +1,6 @@
 import {ipfsProvider} from '../../../../config'
 import {isFileImage} from '../../../../helpers/file'
+import type {ApiIpfsUploadResponse} from '../../../../types/api/ipfs'
 
 export const POST = async (request: Request) => {
   let formData: FormData | undefined = undefined
@@ -25,11 +26,12 @@ export const POST = async (request: Request) => {
   try {
     const res = await ipfsProvider.upload(file)
 
-    return Response.json({
+    const response: ApiIpfsUploadResponse = {
       name: res.name,
       size: res.size,
       cid: res.cid,
-    })
+    }
+    return Response.json(response)
   } catch {
     return Response.json({error: 'Failed to upload file'}, {status: 500})
   }

@@ -1,38 +1,131 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("https://assets.wingriders.com/fonts/ChakraPetch-Regular.ttf");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("https://assets.wingriders.com/fonts/ChakraPetch-Medium.ttf");
+  font-style: normal;
+  font-weight: medium;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("https://assets.wingriders.com/fonts/ChakraPetch-Bold.ttf");
+  font-style: normal;
+  font-weight: bold;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("https://assets.wingriders.com/fonts/DMSans-Regular.ttf");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("https://assets.wingriders.com/fonts/DMSans-Medium.ttf");
+  font-style: normal;
+  font-weight: medium;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("https://assets.wingriders.com/fonts/DMSans-Bold.ttf");
+  font-style: normal;
+  font-weight: bold;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  margin: 0;
+  font-family: "Chakra Petch", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: black;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+body,
+[role="dialog"] {
+  overflow-y: overlay;
+}
+
+/* SPINNER implementation in pure css */
+
+@keyframes spinCW {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+@keyframes spinCCW {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.spinner {
+  position: relative;
+  --wr-spinner-color: white;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+.spinner-large {
+  width: 32px;
+  height: 32px;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.spinner-small {
+  width: 24px;
+  height: 24px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner .outer {
+  position: absolute;
+  border-radius: 100%;
+  left: 0;
+  right: 0;
+  border: 1.5px solid transparent;
+  border-top: 1.5px solid var(--wr-spinner-color);
+  border-right: 1.5px solid var(--wr-spinner-color);
+  width: 100%;
+  height: 100%;
+  animation: spinCW 1.4s linear infinite;
+}
+
+.spinner .inner {
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  border-radius: 100%;
+  border: 1.5px solid transparent;
+  border-bottom: 1.5px solid var(--wr-spinner-color);
+  border-left: 1.5px solid var(--wr-spinner-color);
+  width: 60%;
+  height: 60%;
+  animation: spinCCW 1.4s linear infinite;
 }
 
 @media (prefers-color-scheme: dark) {
