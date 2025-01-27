@@ -11,12 +11,11 @@ import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
 import {Label} from '../../components/Typography/Label'
 import {Paragraph} from '../../components/Typography/Paragraph'
+import {mbToBytes} from '../../helpers/file'
 import {ipfsCidToHttps} from '../../helpers/ipfs'
 import {uploadFiles} from '../../query/ipfs'
+import {MAX_FILE_SIZE_MB} from '../constants'
 import {NFTImagePreview} from './NFTImagePreview'
-
-const MAX_FILE_SIZE_MB = 5
-
 export const UploadFiles = () => {
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [dropErrors, setDropErrors] = useState<FileRejection[]>([])
@@ -62,7 +61,7 @@ export const UploadFiles = () => {
             accept={{
               'image/*': ['.png', '.gif', '.jpeg', '.jpg'],
             }}
-            maxSize={MAX_FILE_SIZE_MB * 1024 * 1024}
+            maxSize={mbToBytes(MAX_FILE_SIZE_MB)}
           >
             {({getRootProps, getInputProps, isDragActive}) => (
               <Box
