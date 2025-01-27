@@ -1,8 +1,8 @@
-import { config } from "../../src/config";
-import { MockedIpfsProvider } from "../../src/ipfs/mockedProvider";
-import { IpfsProvider } from "../../src/ipfs/provider";
+import {config} from '../../src/config'
+import {MockedIpfsProvider} from '../../src/ipfs/mockedProvider'
+import {IpfsProvider} from '../../src/ipfs/provider'
 
-export const createIpfsProvider = () =>
+export const ipfsProvider =
   config.IPFS_PROTOCOL &&
   config.IPFS_HOST &&
   config.IPFS_PORT &&
@@ -15,4 +15,4 @@ export const createIpfsProvider = () =>
           auth: config.IPFS_AUTH,
         },
       })
-    : new MockedIpfsProvider();
+    : new MockedIpfsProvider()

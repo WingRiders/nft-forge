@@ -1,27 +1,31 @@
-import { describe, expect, mock, test } from "bun:test";
-import { isFileImage } from "../../src/helpers/file";
+import {type FileExtension, type MimeType, fileTypeFromBlob} from 'file-type'
+import {describe, expect, test, vi} from 'vitest'
+import {isFileImage} from '../../src/helpers/file'
 
-describe("file", () => {
-  describe("isFileImage ", () => {
-    const testCases: [mime: string, expected: boolean][] = [
-      ["image/png", true],
-      ["image/jpeg", true],
-      ["image/gif", true],
-      ["application/pdf", false],
-      ["text/plain", false],
-    ];
+vi.mock('file-type', () => ({
+  fileTypeFromBlob: vi.fn(),
+}))
+
+describe('file', () => {
+  describe('isFileImage ', () => {
+    const testCases: [mime: MimeType, expected: boolean][] = [
+      ['image/png', true],
+      ['image/jpeg', true],
+      ['image/gif', true],
+      ['application/pdf', false],
+      ['text/calendar', false],
+    ]
 
     test.each(testCases)(
-      "If file mime is %p, isFileImage should return %p",
+      'If file mime is %s, isFileImage should return %s',
       async (mime, expected) => {
-        mock.module("file-type", () => {
-          return {
-            fileTypeFromBlob: () => Promise.resolve({ mime }),
-          };
-        });
+        vi.mocked(fileTypeFromBlob).mockResolvedValueOnce({
+          mime,
+          ext: '' as FileExtension,
+        })
 
-        expect(await isFileImage({} as File)).toBe(expected);
-      }
-    );
-  });
-});
+        expect(await isFileImage({} as File)).toBe(expected)
+      },
+    )
+  })
+})
