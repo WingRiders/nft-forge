@@ -1,6 +1,5 @@
 import {Box, type SxProps, type Theme, keyframes} from '@mui/material'
-
-import {combineSx} from '@/theme'
+import {combineSx} from '../theme'
 
 const U = 100 // arbitrary "unit" for SVG coords
 const RATIO = 0.6 // inner to outer circle
