@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check": "bun biome check src",
+    "check": "bun biome check {src,test}",
     "fix": "bun run check --write",
     "test": "bun test",
     "test:watch": "bun test --watch"
