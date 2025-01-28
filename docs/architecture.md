@@ -24,27 +24,16 @@ By structuring the repository this way, the project ensures a clear separation o
 architecture-beta
     group next_server(cloud)[Nextjs server]
     service be(server)[Backend API] in next_server
-    service fe_server(server)[Frontend server] in next_server
 
     group ipfs_provider(cloud)[IPFS service provider]
     service ipfs_core(server)[Core IPFS service] in ipfs_provider
-  service ipfs_api(internet)[HTTP gateway] in ipfs_provider
-  service ipfs_storage(database)[Filesystem] in ipfs_provider
+    service ipfs_api(internet)[HTTP gateway] in ipfs_provider
+    service ipfs_storage(database)[Filesystem] in ipfs_provider
 
     ipfs_core:L -- R:ipfs_storage
     ipfs_core:R -- L:ipfs_api
 
-    group browser[Browser]
-    service fe_app(server)[Frontend application] in browser
-
     be:L -- R:ipfs_api
-
-    junction junction_app_l
-    junction junction_app_r
-    fe_app:T -- B:junction_app_l
-    junction_app_l:T -- B:be
-    junction_app_l:R -- L:junction_app_r
-    junction_app_r:T -- B:fe_server
 ```
 
 ## Backend API
