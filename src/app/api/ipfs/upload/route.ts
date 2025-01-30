@@ -1,5 +1,6 @@
 import {ipfsProvider} from '../../../../config'
-import {isFileImage} from '../../../../helpers/file'
+import {isFile, isFileImage, mbToBytes} from '../../../../helpers/file'
+import {MAX_FILE_SIZE_MB} from '../../../../mint/constants'
 import type {ApiIpfsUploadResponse} from '../../../../types/api/ipfs'
 
 export const POST = async (request: Request) => {
@@ -13,8 +14,14 @@ export const POST = async (request: Request) => {
   const file = formData.get('file')
   if (!file) return Response.json({error: 'File not provided'}, {status: 400})
 
-  const isFile = file instanceof File
-  if (!isFile) return Response.json({error: 'Invalid file'}, {status: 400})
+  if (!isFile(file))
+    return Response.json({error: 'Invalid file'}, {status: 400})
+
+  if (file.size > mbToBytes(MAX_FILE_SIZE_MB))
+    return Response.json(
+      {error: `File size exceeds ${MAX_FILE_SIZE_MB} MB limit`},
+      {status: 400},
+    )
 
   const isImage = await isFileImage(file)
   if (!isImage)
