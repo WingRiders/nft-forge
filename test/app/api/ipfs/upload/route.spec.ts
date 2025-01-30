@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import FormData from 'form-data'
 import {describe, expect, test, vi} from 'vitest'
+import {IPFS_UPLOAD_ERRORS} from '../../../../../src/api/errors'
 import type {ApiIpfsUploadResponse} from '../../../../../src/api/types/ipfs'
 import {POST as postUploadResolver} from '../../../../../src/app/api/ipfs/upload/route'
 import {mbToBytes} from '../../../../../src/helpers/file'
@@ -49,7 +50,9 @@ describe('/upload route', () => {
 
     const response = await postUploadResolver(req)
     expect(response.status).toEqual(400)
-    expect(await response.json()).toEqual({error: 'Invalid form data'})
+    expect(await response.json()).toEqual({
+      error: IPFS_UPLOAD_ERRORS.INVALID_FORM_DATA,
+    })
   })
 
   test('should return an error if form data is present but the file is missing', async () => {
@@ -63,7 +66,9 @@ describe('/upload route', () => {
 
     const response = await postUploadResolver(req)
     expect(response.status).toEqual(400)
-    expect(await response.json()).toEqual({error: 'File not provided'})
+    expect(await response.json()).toEqual({
+      error: IPFS_UPLOAD_ERRORS.FILE_NOT_PROVIDED,
+    })
   })
 
   test('should return an error if the provided file is not an image', async () => {
@@ -82,7 +87,7 @@ describe('/upload route', () => {
     const res = await postUploadResolver(req)
     expect(res.status).toEqual(400)
     expect(await res.json()).toEqual({
-      error: 'Invalid file type (only images are supported)',
+      error: IPFS_UPLOAD_ERRORS.INVALID_FILE_TYPE,
     })
   })
 
@@ -107,7 +112,7 @@ describe('/upload route', () => {
     const res = await postUploadResolver(req)
     expect(res.status).toEqual(400)
     expect(await res.json()).toEqual({
-      error: `File size exceeds ${MAX_FILE_SIZE_MB} MB limit`,
+      error: IPFS_UPLOAD_ERRORS.FILE_SIZE_EXCEEDS_LIMIT(MAX_FILE_SIZE_MB),
     })
   })
 })

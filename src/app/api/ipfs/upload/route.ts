@@ -1,3 +1,4 @@
+import {IPFS_UPLOAD_ERRORS} from '../../../../api/errors'
 import type {ApiIpfsUploadResponse} from '../../../../api/types/ipfs'
 import {ipfsProvider} from '../../../../config'
 import {isFile, isFileImage, mbToBytes} from '../../../../helpers/file'
@@ -9,24 +10,34 @@ export const POST = async (request: Request) => {
     formData = await request.formData()
   } catch {}
   if (!formData)
-    return Response.json({error: 'Invalid form data'}, {status: 400})
+    return Response.json(
+      {error: IPFS_UPLOAD_ERRORS.INVALID_FORM_DATA},
+      {status: 400},
+    )
 
   const file = formData.get('file')
-  if (!file) return Response.json({error: 'File not provided'}, {status: 400})
+  if (!file)
+    return Response.json(
+      {error: IPFS_UPLOAD_ERRORS.FILE_NOT_PROVIDED},
+      {status: 400},
+    )
 
   if (!isFile(file))
-    return Response.json({error: 'Invalid file'}, {status: 400})
+    return Response.json(
+      {error: IPFS_UPLOAD_ERRORS.INVALID_FILE},
+      {status: 400},
+    )
 
   if (file.size > mbToBytes(MAX_FILE_SIZE_MB))
     return Response.json(
-      {error: `File size exceeds ${MAX_FILE_SIZE_MB} MB limit`},
+      {error: IPFS_UPLOAD_ERRORS.FILE_SIZE_EXCEEDS_LIMIT(MAX_FILE_SIZE_MB)},
       {status: 400},
     )
 
   const isImage = await isFileImage(file)
   if (!isImage)
     return Response.json(
-      {error: 'Invalid file type (only images are supported)'},
+      {error: IPFS_UPLOAD_ERRORS.INVALID_FILE_TYPE},
       {status: 400},
     )
 
@@ -40,6 +51,9 @@ export const POST = async (request: Request) => {
     }
     return Response.json(response)
   } catch {
-    return Response.json({error: 'Failed to upload file'}, {status: 500})
+    return Response.json(
+      {error: IPFS_UPLOAD_ERRORS.FAILED_TO_UPLOAD_FILE},
+      {status: 500},
+    )
   }
 }
