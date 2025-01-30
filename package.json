@@ -9,8 +9,8 @@
     "start": "next start",
     "check": "bun biome check {src,test}",
     "fix": "bun run check --write",
-    "test": "bun run vitest --run",
-    "test:watch": "bun vitest"
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@biomejs/biome": "^1.9.4",
