@@ -9,7 +9,7 @@ import {fireEvent, render, screen} from '../../utils'
 vi.mock('axios')
 
 describe('UploadFiles', () => {
-  test('Can upload files', async () => {
+  test('should be able to upload files', async () => {
     vi.mocked(axios.post).mockImplementationOnce(() => {
       const mockedResponse: ApiIpfsUploadResponse = {
         cid: 'a',
@@ -46,7 +46,7 @@ describe('UploadFiles', () => {
     expect(screen.queryByText('Upload')).toBeNull()
   })
 
-  test('Cannot upload files that are not images', async () => {
+  test('should display an error if the uploaded file is not an image', async () => {
     render(<UploadFiles />)
 
     const inputEl = document.querySelector('input[type="file"]')!
@@ -65,7 +65,7 @@ describe('UploadFiles', () => {
     ).toBeInTheDocument()
   })
 
-  test('Cannot upload files that are too large', async () => {
+  test('should display an error if the uploaded file is too large', async () => {
     render(<UploadFiles />)
 
     const inputEl = document.querySelector('input[type="file"]')!

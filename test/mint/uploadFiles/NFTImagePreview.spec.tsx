@@ -3,7 +3,7 @@ import {NFTImagePreview} from '../../../src/mint/uploadFiles/NFTImagePreview'
 import {render, screen} from '../../utils'
 
 describe('NFTImagePreview', () => {
-  test('Render NFT preview for a URL image', () => {
+  test('should render NFT preview for a URL image', () => {
     render(<NFTImagePreview image="nft-image.png" name="NFT image" />)
 
     const img = screen.getByRole('img')
@@ -11,7 +11,7 @@ describe('NFTImagePreview', () => {
     expect(img).toHaveAttribute('alt', 'NFT image')
   })
 
-  test('Should render NFT preview for a file image', async () => {
+  test('should render NFT preview for a file image', async () => {
     render(
       <NFTImagePreview
         image={new File([], 'file-name.png')}
@@ -30,7 +30,7 @@ describe('NFTImagePreview', () => {
     expect(screen.queryByText('Loading...')).toBeNull()
   })
 
-  test('Render NFT preview with the remove button', () => {
+  test('should render NFT preview with the remove button', () => {
     render(
       <NFTImagePreview
         image="nft-image.png"

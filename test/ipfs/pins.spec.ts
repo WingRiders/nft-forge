@@ -9,8 +9,8 @@ vi.mock('axios', () => ({
   },
 }))
 
-describe('IPFS pins', () => {
-  test('Get all pins', async () => {
+describe('IPFS provider - pins', () => {
+  test('should return all pins from the IPFS provider ', async () => {
     mockIpfsProviderPinsOnce(ipfsPinsResponse)
     const pins = await ipfsProvider.pins()
     expect(pins).toEqual(ipfsPinsResponse)

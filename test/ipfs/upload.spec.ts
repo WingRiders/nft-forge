@@ -9,8 +9,8 @@ vi.mock('axios', () => ({
   },
 }))
 
-describe('IPFS upload', () => {
-  test('Upload a file', async () => {
+describe('IPFS provider - upload', () => {
+  test('should successfully upload a file to the IPFS provider', async () => {
     mockIpfsProviderUploadOnce(ipfsUploadResponse)
     const response = await ipfsProvider.upload({} as File)
     expect(response).toEqual(ipfsUploadResponse)
