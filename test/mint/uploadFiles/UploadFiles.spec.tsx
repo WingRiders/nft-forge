@@ -1,9 +1,9 @@
 import axios from 'axios'
 import {describe, expect, test, vi} from 'vitest'
+import type {ApiIpfsUploadResponse} from '../../../src/api/types/ipfs'
 import {mbToBytes} from '../../../src/helpers/file'
 import {MAX_FILE_SIZE_MB} from '../../../src/mint/constants'
 import {UploadFiles} from '../../../src/mint/uploadFiles/UploadFiles'
-import type {ApiIpfsUploadResponse} from '../../../src/types/api/ipfs'
 import {fireEvent, render, screen} from '../../utils'
 
 vi.mock('axios')

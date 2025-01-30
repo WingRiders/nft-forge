@@ -2,7 +2,7 @@ import axios from 'axios'
 import type {
   ApiIpfsPinsResponse,
   ApiIpfsUploadResponse,
-} from '../types/api/ipfs'
+} from '../api/types/ipfs'
 
 export const fetchPins = async () => {
   const res = await axios.get('/api/ipfs/pins')

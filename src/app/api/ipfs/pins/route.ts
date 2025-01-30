@@ -1,5 +1,5 @@
+import type {ApiIpfsPinsResponse} from '../../../../api/types/ipfs'
 import {ipfsProvider} from '../../../../config'
-import type {ApiIpfsPinsResponse} from '../../../../types/api/ipfs'
 
 export const GET = async () => {
   const pins = await ipfsProvider.pins()
