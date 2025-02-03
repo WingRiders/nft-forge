@@ -1,10 +1,16 @@
 'use client'
 
 import {AppBar, Stack, useScrollTrigger} from '@mui/material'
+import type {SupportedWalletType} from '../app/connect-wallet/supportedWallets'
+import {shortLabel} from '../helpers/shortLabel'
+import {useConnectedWalletStore} from '../store/connectedWallet'
+import {SupportedWalletImage} from './SupportedWalletImage'
 import {Heading} from './Typography/Heading'
+import {Paragraph} from './Typography/Paragraph'
 
 export const Header = () => {
   const scrolled = useScrollTrigger({threshold: 20, disableHysteresis: true})
+  const connectedWallet = useConnectedWalletStore((s) => s.connectedWallet)
 
   return (
     <AppBar
@@ -32,6 +38,18 @@ export const Header = () => {
         minHeight={50}
       >
         <Heading variant="h3">NFT Forge</Heading>
+
+        {connectedWallet && (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Paragraph>{shortLabel(connectedWallet.address, 15, 8)}</Paragraph>
+            <SupportedWalletImage
+              walletType={
+                connectedWallet.wallet._walletName as SupportedWalletType
+              }
+              size={20}
+            />
+          </Stack>
+        )}
       </Stack>
     </AppBar>
   )

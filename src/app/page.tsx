@@ -1,5 +1,5 @@
-import {UploadFiles} from '../mint/uploadFiles/UploadFiles'
+import {redirect} from 'next/navigation'
 
 export default function Home() {
-  return <UploadFiles />
+  return redirect('connect-wallet')
 }
