@@ -13,7 +13,19 @@ This repository contains a Next.js project that serves as the core of the applic
    1. **Backend API**  
       This module is responsible for managing the interactions between the frontend application and external services. It acts as a bridge to communicate with the IPFS server, ensuring smooth data flow and enabling the storage and retrieval of NFT images on the decentralized storage network.
 
-2. **IPFS service provider**  
+   2. **Frontend server**  
+      The frontend server is responsible for serving static assets, such as JavaScript, HTML, and CSS, to the browser-based frontend app. It also performs server-side rendering (SSR) for certain pages to enhance SEO and improve initial page load times. This server ensures the frontend app is delivered efficiently to the user’s browser.
+
+2. **Frontend app**: application that runs in the user's browser.  
+   The browser-based frontend app provides users with an intuitive interface for connecting to a Cardano wallet and uploading NFTs images to IPFS. The app communicates directly with the backend API to process user inputs and manage interactions with external services. It also integrates with wallets for retrieving data from the Cardano blockchain.
+
+3. **Cardano wallet**:  
+   The wallet is an external component that acts as a gateway between the frontend app and the Cardano blockchain. It allows users to sign transactions, authorize minting actions, and manage their assets securely. The frontend app communicates with the wallet to initiate these operations.
+
+4. **Cardano blockchain**:  
+   The Cardano blockchain serves as the decentralized network where NFTs are minted and stored. The blockchain ensures the immutability and security of the minted assets. The wallet interacts with the blockchain to submit signed transactions, verify minting processes, and retrieve blockchain data.
+
+5. **IPFS service provider**  
    This external component is tasked with handling operations related to IPFS (InterPlanetary File System). While it is not included as part of this repository, it plays a critical role in storing and retrieving images for the NFTs. The backend API integrates with this service provider to facilitate these interactions. Detailed information on how the IPFS service provider is configured and used can be found in the [IPFS system design](#ipfs-system-design) section.
 
 By structuring the repository this way, the project ensures a clear separation of concerns and allows for easy scalability and maintainability. While the Next.js server forms the core of the application, the flexibility to integrate with external services like IPFS allows the system to take full advantage of decentralized storage solutions without complicating the core repository.
@@ -24,6 +36,7 @@ By structuring the repository this way, the project ensures a clear separation o
 architecture-beta
     group next_server(cloud)[Nextjs server]
     service be(server)[Backend API] in next_server
+    service fe_server(server)[Frontend server] in next_server
 
     group ipfs_provider(cloud)[IPFS service provider]
     service ipfs_core(server)[Core IPFS service] in ipfs_provider
@@ -33,7 +46,22 @@ architecture-beta
     ipfs_core:L -- R:ipfs_storage
     ipfs_core:R -- L:ipfs_api
 
+    group browser[Browser]
+    service fe_app(server)[Frontend application] in browser
+    service wallet(server)[Cardano wallet] in browser
+    fe_app:L -- R:wallet
+
+    service blockchain(cloud)[Cardano blockchain]
+    wallet:L -- R:blockchain
+
     be:L -- R:ipfs_api
+
+    junction junction_app_l
+    junction junction_app_r
+    fe_app:T -- B:junction_app_l
+    junction_app_l:T -- B:be
+    junction_app_l:R -- L:junction_app_r
+    junction_app_r:T -- B:fe_server
 ```
 
 ## Backend API
@@ -120,6 +148,82 @@ The scalability of the backend API is closely tied to the configuration and depl
 To efficiently manage these instances and maintain optimal performance, implementing a load balancer is crucial. A load balancer evenly distributes incoming requests across all active server instances, preventing any single instance from becoming a bottleneck. This setup not only enhances the reliability of the system by reducing the risk of downtime due to server overload but also improves the overall user experience by ensuring faster response times during high-traffic periods.
 
 For step-by-step guidance on deploying multiple instances, configuring a load balancer, and optimizing your infrastructure for scalability, consult the official documentation provided by your infrastructure provider. This documentation will typically include best practices for deploying containerized applications, setting up load balancing, and monitoring system performance to ensure smooth operations as your traffic grows.
+
+## Frontend
+
+The frontend application is built using Next.js and TypeScript, ensuring a modern, scalable, and efficient development experience. Running entirely in the user's browser, the app delivers a seamless interface for interacting with the NFT minting platform. It fetches its static assets, including JavaScript, HTML, and CSS files, from the Frontend Server, enabling quick loading and rendering.
+
+The app communicates with the Cardano blockchain indirectly through an integrated Cardano wallet, which acts as a secure intermediary for fetching blockchain data, signing transactions, and submitting them. This architecture ensures a responsive and user-centric experience while leveraging the full potential of decentralized blockchain interactions.
+
+### Core technologies
+
+- [@mui/material](https://mui.com/material-ui/) – used for UI components and theming
+- [@tanstack/react-query](https://tanstack.com/query/latest) – simplifies data fetching and mutations using React hooks
+- [axios](https://www.axios.com/) – a library for making HTTP requests
+- [Mesh](https://meshjs.dev/) - library for wallet communication and transaction building
+
+### Error handling
+
+Different types of errors can occur in the NFT Forge web application:
+
+- **Errors during HTTP calls** – Handled by the `@tanstack/react-query` library and returned in the `useQuery` or `useMutation` hooks. These errors are then displayed in the frontend UI.
+- **Errors when communicating with the wallet API** - All calls to the wallet API are wrapped in `try/catch` blocks to ensure that any potential errors are handled correctly. For example, if an error occurs when calling `wallet.getUsedAddresses()`, it will be shown to the user in the frontend UI.
+- **Unexpected errors during React rendering** – If an unexpected error occurs while rendering a component, it is caught by the top-level [React error boundary](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary). This component displays the error and provides the user with an option to reload the application.
+
+### UI/UX design
+
+The [Frontend UI/UX design](./frontend-design.md) document showcases the UI and UX design of the frontend application in its current state.
+
+### Wallets
+
+In the early stages of development, only a few Cardano wallets will be supported (namely Eternl, Lace, NuFi and Typhon). More wallets will be added in the future.
+
+The minting application connects to these wallets by using the [CIP-30 API](https://cips.cardano.org/cip/CIP-30).
+
+### Blockchain communication
+
+The process of interacting with the Cardano blockchain for NFT minting involves seamless communication between the frontend application, the user's wallet, and the blockchain. The following sequence diagram illustrates the step-by-step flow of connecting wallet to the application.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant App as Frontend app
+    participant Wallet
+    participant Blockchain as Cardano blockchain
+
+    User->>App: Clicks "Connect wallet"
+    App->>Wallet: Initiates wallet connection
+    Wallet->>User: Prompts to confirm connection
+    User->>Wallet: Confirms connection
+    Wallet-->>App: Returns wallet API
+    App->>Wallet: Fetches data (UTXOs, address, ...)
+    Wallet->>Blockchain: Fetches data from the blockchain
+    Blockchain-->>Wallet: Returns data
+    Wallet-->>App: Returns data
+    App->>User: Displays user's address
+```
+
+### API communication
+
+The frontend application communicates with the backend API using the HTTP protocol. The following sequence diagram showcases this communication when user uploads NFTs images to the app.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant App as Frontend app
+    participant Api as Backend API
+    participant Ipfs as IPFS provider
+
+    User->>App: Uploads images
+    App->>App: Validates the images
+    App->>Api: Sends an HTTP call to upload the images
+    Api->>Api: Validates the images
+    Api->>Ipfs: Uploads the images to the IPFS provider
+    Ipfs-->>Api: Returns IDs of the uploaded images
+    Api-->>App: Returns IDs of the uploaded images
+    App->>App: Fetches images based on the IPFS IDs
+    App->>User: Displays the images from the IPFS
+```
 
 ## IPFS system design
 
