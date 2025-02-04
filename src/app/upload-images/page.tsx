@@ -1,29 +1,38 @@
 'use client'
 
-import {Box, Grid2, Stack} from '@mui/material'
-
+import {Alert, Box, Grid2, Stack} from '@mui/material'
 import {useMutation} from '@tanstack/react-query'
+import {AxiosError} from 'axios'
 import {uniqBy} from 'lodash'
 import {useState} from 'react'
 import Dropzone, {type DropzoneProps, type FileRejection} from 'react-dropzone'
+import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
+import {MintStepper} from '../../components/MintStepper'
 import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
 import {Label} from '../../components/Typography/Label'
 import {Paragraph} from '../../components/Typography/Paragraph'
+import {MAX_FILE_SIZE_MB} from '../../constants'
 import {mbToBytes} from '../../helpers/file'
 import {ipfsCidToHttps} from '../../helpers/ipfs'
 import {uploadFiles} from '../../query/ipfs'
-import {MAX_FILE_SIZE_MB} from '../constants'
+import {useCollectionStore} from '../../store/collection'
+import {MintStep} from '../../types'
 import {NFTImagePreview} from './NFTImagePreview'
-export const UploadFiles = () => {
-  const [filesToUpload, setFilesToUpload] = useState<File[]>([])
+
+const UploadImagesPage = () => {
+  const {nftsData, setNFTsData} = useCollectionStore(
+    useShallow(({nftsData, setNFTsData}) => ({nftsData, setNFTsData})),
+  )
+
+  const [imagesToUpload, setImagesToUpload] = useState<File[]>([])
   const [dropErrors, setDropErrors] = useState<FileRejection[]>([])
 
   const {
-    mutateAsync: upload,
-    data: uploadedFiles,
-    isPending: isLoadingUpload,
+    mutateAsync: uploadImages,
+    error: uploadError,
+    isPending: isUploading,
     reset: resetUploadMutation,
   } = useMutation({mutationFn: uploadFiles})
 
@@ -32,20 +41,30 @@ export const UploadFiles = () => {
     fileRejection,
   ) => {
     setDropErrors(fileRejection)
-    setFilesToUpload((existingFiles) =>
+    setImagesToUpload((existingFiles) =>
       uniqBy([...existingFiles, ...acceptedFiles], (file) => file.name),
     )
     resetUploadMutation()
   }
 
-  const handleFilesUpload = async () => {
-    await upload(filesToUpload)
-    setFilesToUpload([])
+  const handleUploadClick = async () => {
+    const uploadedImages = await uploadImages(imagesToUpload)
+    setImagesToUpload([])
+
+    setNFTsData(
+      uploadedImages.map(({cid, name}) => ({
+        imageIpfsCid: cid,
+        name: name.split('.').slice(0, -1).join('.'), // remove file extension from name
+      })),
+      true,
+    )
   }
 
   return (
     <Page>
-      <Paper title="Upload Files">
+      <MintStepper step={MintStep.UPLOAD_IMAGES} sx={{mt: 3, mb: 5}} />
+
+      <Paper title="Upload images">
         <Paragraph variant="long">
           Upload images for your NFTs. Each image has to have a unique name.
           <br />
@@ -84,8 +103,8 @@ export const UploadFiles = () => {
                 <input {...getInputProps()} />
                 <Label variant="large">
                   {isDragActive
-                    ? 'Release to drop files'
-                    : 'Drag and drop files here, or click to select files'}
+                    ? 'Release to drop images'
+                    : 'Drag and drop images here, or click to select files'}
                 </Label>
               </Box>
             )}
@@ -119,23 +138,23 @@ export const UploadFiles = () => {
             </Stack>
           )}
 
-          {filesToUpload.length > 0 && (
+          {imagesToUpload.length > 0 && (
             <Stack
               mt={3}
               spacing={2}
               bgcolor={({palette}) => palette.background.paper}
               p={4}
             >
-              <Label variant="large">Files to be uploaded:</Label>
+              <Label variant="large">Images to be uploaded:</Label>
               <Grid2 container spacing={4}>
-                {filesToUpload.map((file) => (
+                {imagesToUpload.map((file) => (
                   <Grid2 key={file.name} size={4}>
                     <NFTImagePreview
                       image={file}
                       name={file.name}
                       showRemoveButton
                       onRemove={() =>
-                        setFilesToUpload((existingFiles) =>
+                        setImagesToUpload((existingFiles) =>
                           existingFiles.filter((f) => f.name !== file.name),
                         )
                       }
@@ -147,36 +166,62 @@ export const UploadFiles = () => {
           )}
         </Box>
 
-        {filesToUpload.length > 0 && (
+        {uploadError && (
+          <Alert severity="error" sx={{mt: 5}}>
+            Error while uploading images:{' '}
+            {uploadError instanceof AxiosError
+              ? uploadError.response?.data.error
+              : uploadError.message}
+          </Alert>
+        )}
+
+        {imagesToUpload.length > 0 && (
           <Button
-            onClick={handleFilesUpload}
+            onClick={handleUploadClick}
             fullWidth
             sx={{mt: 5}}
-            disabled={isLoadingUpload}
-            loading={isLoadingUpload && 'inline'}
+            disabled={isUploading}
+            loading={isUploading && 'inline'}
           >
             Upload
           </Button>
         )}
 
-        {uploadedFiles && uploadedFiles.length > 0 && (
-          <Stack
-            mt={3}
-            spacing={2}
-            bgcolor={({palette}) => palette.background.paper}
-            p={4}
-          >
-            <Label variant="large">Uploaded files:</Label>
-            <Grid2 container spacing={4}>
-              {uploadedFiles.map(({cid, name}) => (
-                <Grid2 key={cid} size={4}>
-                  <NFTImagePreview image={ipfsCidToHttps(cid)} name={name} />
-                </Grid2>
-              ))}
-            </Grid2>
+        {nftsData.length > 0 && (
+          <Stack mt={3}>
+            <Stack
+              spacing={2}
+              bgcolor={({palette}) => palette.background.paper}
+              p={4}
+            >
+              <Label
+                variant="large"
+                sx={({palette}) => ({color: palette.success.main})}
+              >
+                Images uploaded successfully
+              </Label>
+              <Grid2 container spacing={4}>
+                {nftsData.map(({imageIpfsCid, name}) => (
+                  <Grid2 key={imageIpfsCid} size={4}>
+                    <NFTImagePreview
+                      image={ipfsCidToHttps(imageIpfsCid)}
+                      name={name}
+                    />
+                  </Grid2>
+                ))}
+              </Grid2>
+            </Stack>
+
+            {imagesToUpload.length === 0 && (
+              <Stack alignItems="flex-end" mt={5}>
+                <Button>Continue</Button>
+              </Stack>
+            )}
           </Stack>
         )}
       </Paper>
     </Page>
   )
 }
+
+export default UploadImagesPage

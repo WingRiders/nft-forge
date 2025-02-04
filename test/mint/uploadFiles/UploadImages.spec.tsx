@@ -1,15 +1,15 @@
 import axios from 'axios'
 import {describe, expect, test, vi} from 'vitest'
 import type {ApiIpfsUploadResponse} from '../../../src/api/types/ipfs'
+import UploadImagesPage from '../../../src/app/upload-images/page'
+import {MAX_FILE_SIZE_MB} from '../../../src/constants'
 import {mbToBytes} from '../../../src/helpers/file'
-import {MAX_FILE_SIZE_MB} from '../../../src/mint/constants'
-import {UploadFiles} from '../../../src/mint/uploadFiles/UploadFiles'
 import {fireEvent, render, screen} from '../../utils'
 
 vi.mock('axios')
 
-describe('UploadFiles', () => {
-  test('should be able to upload files', async () => {
+describe('UploadImages', () => {
+  test('should be able to upload images', async () => {
     vi.mocked(axios.post).mockImplementationOnce(() => {
       const mockedResponse: ApiIpfsUploadResponse = {
         cid: 'a',
@@ -19,7 +19,7 @@ describe('UploadFiles', () => {
       return Promise.resolve({data: mockedResponse})
     })
 
-    render(<UploadFiles />)
+    render(<UploadImagesPage />)
 
     const inputEl = document.querySelector('input[type="file"]')!
     expect(inputEl).toBeInTheDocument()
@@ -37,17 +37,19 @@ describe('UploadFiles', () => {
     const uploadButton = screen.getByText('Upload')
     fireEvent.click(uploadButton)
 
-    expect(await screen.findByText('Uploaded files:')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Images uploaded successfully'),
+    ).toBeInTheDocument()
 
     const img = screen.getByRole('img')
     expect(img).toHaveAttribute('src', 'https://ipfs.io/ipfs/a')
-    expect(img).toHaveAttribute('alt', 'image.png')
-    expect(screen.getByText('image.png')).toBeInTheDocument()
+    expect(img).toHaveAttribute('alt', 'image')
+    expect(screen.getByText('image')).toBeInTheDocument()
     expect(screen.queryByText('Upload')).toBeNull()
   })
 
   test('should display an error if the uploaded file is not an image', async () => {
-    render(<UploadFiles />)
+    render(<UploadImagesPage />)
 
     const inputEl = document.querySelector('input[type="file"]')!
     expect(inputEl).toBeInTheDocument()
@@ -65,8 +67,8 @@ describe('UploadFiles', () => {
     ).toBeInTheDocument()
   })
 
-  test('should display an error if the uploaded file is too large', async () => {
-    render(<UploadFiles />)
+  test('should display an error if the uploaded image is too large', async () => {
+    render(<UploadImagesPage />)
 
     const inputEl = document.querySelector('input[type="file"]')!
     expect(inputEl).toBeInTheDocument()

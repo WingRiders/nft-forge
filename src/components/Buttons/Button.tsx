@@ -126,7 +126,7 @@ export const Button = (props: ButtonProps) => {
   const spinnerSize = {'extra-small': 16, small: 18, medium: 23, large: 28}[
     size
   ]
-  const linkToProps = !anchor && linkTo ? {to: linkTo} : {}
+  const linkToProps = !anchor && linkTo ? {href: linkTo} : {}
   const componentProps = anchor
     ? {component: 'a'}
     : linkTo

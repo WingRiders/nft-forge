@@ -58,7 +58,7 @@ const TextButton = (props: TextButtonProps) => {
     ...otherProps
   } = props
 
-  const linkToProps = !anchor && linkTo ? {to: linkTo} : {}
+  const linkToProps = !anchor && linkTo ? {href: linkTo} : {}
 
   return (
     <MuiButton

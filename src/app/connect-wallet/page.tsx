@@ -5,6 +5,7 @@ import {Alert, Grid2, Stack} from '@mui/material'
 import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
 import {CssSpinner} from '../../components/CssSpinner'
+import {MintStepper} from '../../components/MintStepper'
 import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
 import {SupportedWalletImage} from '../../components/SupportedWalletImage'
@@ -13,6 +14,7 @@ import {Label} from '../../components/Typography/Label'
 import {Paragraph} from '../../components/Typography/Paragraph'
 import {Center} from '../../components/utilities'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
+import {MintStep} from '../../types'
 import {WalletItem} from './WalletItem'
 import {useConnectWalletMutation, useInstalledWalletsIdsQuery} from './queries'
 import {
@@ -39,6 +41,8 @@ const ConnectWalletPage = () => {
 
   return (
     <Page>
+      <MintStepper step={MintStep.CONNECT_WALLET} sx={{mt: 3, mb: 5}} />
+
       <Paper title="Connect wallet">
         {isLoadingInstalledWalletsIds ? (
           <Center minHeight={200}>
@@ -96,7 +100,7 @@ const ConnectWalletPage = () => {
                 </Stack>
 
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  <Button>Continue</Button>
+                  <Button linkTo="/upload-images">Continue</Button>
                 </Stack>
               </Stack>
             ) : (

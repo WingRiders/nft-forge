@@ -1,8 +1,8 @@
 import {IPFS_UPLOAD_ERRORS} from '../../../../api/errors'
 import type {ApiIpfsUploadResponse} from '../../../../api/types/ipfs'
 import {ipfsProvider} from '../../../../config'
+import {MAX_FILE_SIZE_MB} from '../../../../constants'
 import {isFile, isFileImage, mbToBytes} from '../../../../helpers/file'
-import {MAX_FILE_SIZE_MB} from '../../../../mint/constants'
 
 export const POST = async (request: Request) => {
   let formData: FormData | undefined = undefined

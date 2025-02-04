@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest'
-import {NFTImagePreview} from '../../../src/mint/uploadFiles/NFTImagePreview'
+import {NFTImagePreview} from '../../../src/app/upload-images/NFTImagePreview'
 import {render, screen} from '../../utils'
 
 describe('NFTImagePreview', () => {
