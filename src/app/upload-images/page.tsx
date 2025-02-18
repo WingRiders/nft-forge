@@ -205,6 +205,7 @@ const UploadImagesPage = () => {
                   <Grid2 key={imageIpfsCid} size={4}>
                     <NFTImagePreview
                       image={ipfsCidToHttps(imageIpfsCid)}
+                      cid={imageIpfsCid}
                       name={name}
                     />
                   </Grid2>
