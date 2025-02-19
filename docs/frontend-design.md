@@ -19,6 +19,10 @@ After you successfully connect your wallet, the app will display your address an
 
 ![Wallet connected](./assets/design-sketches/wallet-connected.png)
 
+If there is an error while connecting to the selected wallet, the app will display it:
+
+![Connect wallet error](assets/design-sketches/connect-wallet-error.png)
+
 ## Upload NFT images
 
 The next step is to upload images for your NFTs. You can either drag and drop the files into the designated area or click to upload them manually using the file explorer.
@@ -34,3 +38,14 @@ After you add your images, the app will display them and you can click the `UPLO
 After the images are uploaded successfully, the app will display them:
 
 ![Images uploaded](./assets/design-sketches/images-uploaded.png)
+
+### Error handling
+
+There are multiple different errors that can happen during file upload. The application will handle them and display a meaningful error message to the user.
+
+- Error if the uploaded file is not an image:
+  ![Not an image](assets/design-sketches/image-upload-not-an-image-error.png)
+- Error during backend validation. If the user changes the file extension to e.g. `.png`, but the file is not an image, the backend validation will fail:
+  ![Not an image](assets/design-sketches/image-upload-not-an-image-backend-error.png)
+- Error if the uploaded file is too large:
+  ![Image too large](assets/design-sketches/image-upload-too-large-error.png)
