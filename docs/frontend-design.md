@@ -35,7 +35,7 @@ After you add your images, the app will display them and you can click the `UPLO
 
 ![Images to the uploaded](./assets/design-sketches/images-to-be-uploaded.png)
 
-After the images are uploaded successfully, the app will display them:
+After the images are uploaded successfully, the app will display them together with their IPFS hashes:
 
 ![Images uploaded](./assets/design-sketches/images-uploaded.png)
 
