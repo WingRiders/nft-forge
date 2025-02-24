@@ -7,12 +7,12 @@ export type NFTData = {
   description?: string
 }
 
-type CollectionSate = {
+type CollectionState = {
   nftsData: NFTData[]
   setNFTsData: (data: NFTData[], append?: boolean) => void
 }
 
-export const useCollectionStore = create<CollectionSate>()((set) => ({
+export const useCollectionStore = create<CollectionState>()((set) => ({
   nftsData: [],
   setNFTsData: (nftsData, append = false) =>
     set((state) => ({
