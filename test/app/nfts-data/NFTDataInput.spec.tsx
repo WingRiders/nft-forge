@@ -1,4 +1,5 @@
-import type {UseFormWatch} from 'react-hook-form'
+import type {Control, UseFormStateReturn} from 'react-hook-form'
+import {useFormState} from 'react-hook-form'
 import {afterEach, describe, expect, test, vi} from 'vitest'
 import {NFTDataInput} from '../../../src/app/nfts-data/NFTDataInput'
 import type {NFTsDataInputs} from '../../../src/app/nfts-data/types'
@@ -9,6 +10,30 @@ vi.mock('../../../src/helpers/ipfs', () => ({
   ipfsCidToHttps: vi.fn((cid) => `https://ipfs.io/ipfs/${cid}`),
 }))
 
+vi.mock('react-hook-form', async () => {
+  const actual = await vi.importActual('react-hook-form')
+  return {
+    ...actual,
+    useWatch: vi.fn().mockImplementation(({name}) => {
+      const values = {
+        'nftsData.1.name': 'Test NFT',
+        'nftsData.1.imageIpfsCid': 'QmTest123',
+        'nftsData.1.imageMimeType': 'image/png',
+        'nftsData.1.assetNameUtf8': 'Test Asset',
+        'nftsData.1.description': 'Test Description',
+      }
+      return values[name as keyof typeof values]
+    }),
+    useFormState: vi.fn().mockImplementation(() => ({
+      errors: {
+        nftsData: {
+          '1': {},
+        },
+      },
+    })),
+  }
+})
+
 describe('NFTDataInput', () => {
   afterEach(() => {
     vi.clearAllMocks()
@@ -17,20 +42,7 @@ describe('NFTDataInput', () => {
   const defaultProps = {
     id: '1',
     register: vi.fn(),
-    watch: vi
-      .fn()
-      .mockImplementation(
-        (field: Parameters<UseFormWatch<NFTsDataInputs>>[0]) => {
-          const values = {
-            'nftsData.1.name': 'Test NFT',
-            'nftsData.1.imageIpfsCid': 'QmTest123',
-            'nftsData.1.imageMimeType': 'image/png',
-            'nftsData.1.assetNameUtf8': 'Test Asset',
-            'nftsData.1.description': 'Test Description',
-          }
-          return values[field as unknown as keyof typeof values]
-        },
-      ) as UseFormWatch<NFTsDataInputs>,
+    control: vi.fn() as unknown as Control<NFTsDataInputs>,
     errors: {},
     onDelete: vi.fn(),
   }
@@ -55,20 +67,22 @@ describe('NFTDataInput', () => {
   })
 
   test('should show error messages when form has errors', () => {
-    const propsWithErrors = {
-      ...defaultProps,
-      errors: {
-        nftsData: {
-          '1': {
-            assetNameUtf8: {
-              type: 'required',
+    vi.mocked(useFormState).mockImplementationOnce(
+      () =>
+        ({
+          errors: {
+            nftsData: {
+              '1': {
+                assetNameUtf8: {
+                  type: 'required',
+                },
+              },
             },
           },
-        },
-      },
-    }
+        }) as unknown as UseFormStateReturn<NFTsDataInputs>,
+    )
 
-    render(<NFTDataInput {...propsWithErrors} />)
+    render(<NFTDataInput {...defaultProps} />)
     expect(screen.getByText('This field is required')).toBeInTheDocument()
   })
 

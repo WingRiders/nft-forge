@@ -6,7 +6,12 @@ import {
   Stack,
 } from '@mui/material'
 import {useState} from 'react'
-import type {FieldErrors, UseFormRegister, UseFormWatch} from 'react-hook-form'
+import {
+  type Control,
+  type UseFormRegister,
+  useFormState,
+  useWatch,
+} from 'react-hook-form'
 import {Button} from '../../components/Buttons/Button'
 import {TextButton} from '../../components/Buttons/TextButton'
 import {FormField} from '../../components/FormField'
@@ -19,22 +24,25 @@ import type {NFTsDataInputs} from './types'
 
 type NFTDataInputProps = {
   id: string
+  control: Control<NFTsDataInputs>
   register: UseFormRegister<NFTsDataInputs>
-  watch: UseFormWatch<NFTsDataInputs>
-  errors: FieldErrors<NFTsDataInputs>
   onDelete?: () => void
 }
 
 export const NFTDataInput = ({
   id,
+  control,
   register,
-  watch,
-  errors,
   onDelete,
 }: NFTDataInputProps) => {
-  const name = watch(`nftsData.${id}.name`)
-  const imageIpfsCid = watch(`nftsData.${id}.imageIpfsCid`)
-  const imageMimeType = watch(`nftsData.${id}.imageMimeType`)
+  const name = useWatch({control, name: `nftsData.${id}.name`})
+  const imageIpfsCid = useWatch({control, name: `nftsData.${id}.imageIpfsCid`})
+  const imageMimeType = useWatch({
+    control,
+    name: `nftsData.${id}.imageMimeType`,
+  })
+
+  const {errors} = useFormState({control, name: `nftsData.${id}`})
 
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
     useState(false)

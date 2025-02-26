@@ -1,6 +1,7 @@
 'use client'
 
 import {Divider, Stack} from '@mui/material'
+import {omit} from 'lodash'
 import {useRouter} from 'next/navigation'
 import {Fragment} from 'react'
 import {type SubmitHandler, useForm} from 'react-hook-form'
@@ -31,9 +32,12 @@ const NFTsDataPage = () => {
   const {
     register,
     handleSubmit,
-    watch,
-    formState: {errors, isSubmitted},
+    formState: {isSubmitted},
     control,
+    setError,
+    clearErrors,
+    setValue,
+    getValues,
   } = useForm<NFTsDataInputs>({
     defaultValues: {
       nftsData,
@@ -46,7 +50,10 @@ const NFTsDataPage = () => {
   }
 
   const handleDeleteNFT = (id: string) => {
+    // delete from the store
     deleteNFT(id)
+    // delete from the form state
+    setValue('nftsData', omit(getValues('nftsData'), id))
   }
 
   return (
@@ -66,9 +73,8 @@ const NFTsDataPage = () => {
                 )}
                 <NFTDataInput
                   id={nftData.id}
+                  control={control}
                   register={register}
-                  watch={watch}
-                  errors={errors}
                   onDelete={() => handleDeleteNFT(nftData.id)}
                 />
               </Fragment>
@@ -77,6 +83,8 @@ const NFTsDataPage = () => {
 
         <CollectionValidation
           control={control}
+          setError={setError}
+          clearErrors={clearErrors}
           isSubmitted={isSubmitted}
           sx={{my: 5}}
         />

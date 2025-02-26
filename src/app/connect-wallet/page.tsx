@@ -20,6 +20,7 @@ import {Heading} from '../../components/Typography/Heading'
 import {Label} from '../../components/Typography/Label'
 import {Paragraph} from '../../components/Typography/Paragraph'
 import {Center} from '../../components/utilities'
+import {isCollateralUtxo} from '../../helpers/collateral'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
 import {MintStep} from '../../types'
 import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
@@ -41,8 +42,8 @@ const getHasCollateralQueryFn: QueryFunction<
     throw new Error('Wallet not connected')
   }
 
-  const c = await wallet.getCollateral()
-  return c.length > 0
+  const utxos = await wallet.getUtxos()
+  return utxos.some(isCollateralUtxo)
 }
 
 const ConnectWalletPage = () => {

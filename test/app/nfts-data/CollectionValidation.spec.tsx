@@ -1,18 +1,30 @@
 import {render, screen} from '@testing-library/react'
-import type {Control} from 'react-hook-form'
-import {useWatch} from 'react-hook-form'
-import {describe, expect, test, vi} from 'vitest'
+import type {Control, UseFormStateReturn} from 'react-hook-form'
+import {useFormState, useWatch} from 'react-hook-form'
+import {beforeEach, describe, expect, test, vi} from 'vitest'
 import {CollectionValidation} from '../../../src/app/nfts-data/CollectionValidation'
 import type {NFTsDataInputs} from '../../../src/app/nfts-data/types'
 
 vi.mock('react-hook-form', () => ({
   useWatch: vi.fn(),
+  useFormState: vi.fn(),
 }))
 
 const mockedUseWatch = vi.mocked(useWatch)
+const mockedUseFormState = vi.mocked(useFormState<NFTsDataInputs>)
 
 describe('CollectionValidation', () => {
   const mockControl = {} as Control<NFTsDataInputs>
+  const mockSetError = vi.fn()
+  const mockClearErrors = vi.fn()
+
+  beforeEach(() => {
+    mockSetError.mockClear()
+    mockClearErrors.mockClear()
+    mockedUseFormState.mockReturnValue({
+      errors: {},
+    } as UseFormStateReturn<NFTsDataInputs>)
+  })
 
   test('should render nothing when there are no duplicates', () => {
     mockedUseWatch.mockReturnValue({
@@ -21,7 +33,12 @@ describe('CollectionValidation', () => {
     })
 
     const {container} = render(
-      <CollectionValidation control={mockControl} isSubmitted={true} />,
+      <CollectionValidation
+        control={mockControl}
+        isSubmitted={true}
+        setError={mockSetError}
+        clearErrors={mockClearErrors}
+      />,
     )
     expect(container.firstChild).toBeNull()
   })
@@ -33,7 +50,12 @@ describe('CollectionValidation', () => {
     })
 
     const {container} = render(
-      <CollectionValidation control={mockControl} isSubmitted={false} />,
+      <CollectionValidation
+        control={mockControl}
+        isSubmitted={false}
+        setError={mockSetError}
+        clearErrors={mockClearErrors}
+      />,
     )
     expect(container.firstChild).toBeNull()
   })
@@ -44,11 +66,28 @@ describe('CollectionValidation', () => {
       nft2: {assetNameUtf8: 'asset1'},
     })
 
-    render(<CollectionValidation control={mockControl} isSubmitted={true} />)
+    mockedUseFormState.mockReturnValue({
+      errors: {
+        nftsData: {
+          // @ts-ignore
+          message:
+            'Each NFT in the collection must have a unique asset name. Duplicate asset names: asset1',
+        },
+      },
+    })
+
+    render(
+      <CollectionValidation
+        control={mockControl}
+        isSubmitted={true}
+        setError={mockSetError}
+        clearErrors={mockClearErrors}
+      />,
+    )
 
     expect(
       screen.getByText(
-        'Each NFT in the collection must have a unique asset name.',
+        'Each NFT in the collection must have a unique asset name. Duplicate asset names: asset1',
       ),
     ).toBeInTheDocument()
   })
@@ -57,7 +96,12 @@ describe('CollectionValidation', () => {
     mockedUseWatch.mockReturnValue({})
 
     const {container} = render(
-      <CollectionValidation control={mockControl} isSubmitted={true} />,
+      <CollectionValidation
+        control={mockControl}
+        isSubmitted={true}
+        setError={mockSetError}
+        clearErrors={mockClearErrors}
+      />,
     )
     expect(container.firstChild).toBeNull()
   })
