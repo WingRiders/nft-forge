@@ -3,7 +3,6 @@
 import type {BrowserWallet} from '@meshsdk/core'
 import {Alert, AlertTitle, Divider, Stack} from '@mui/material'
 import {type QueryFunction, useQuery} from '@tanstack/react-query'
-import {format} from 'date-fns'
 import {useRouter} from 'next/navigation'
 import pluralize from 'pluralize'
 import {Fragment} from 'react'
@@ -16,6 +15,7 @@ import {Paper} from '../../components/Paper'
 import {Heading} from '../../components/Typography/Heading'
 import {Paragraph} from '../../components/Typography/Paragraph'
 import {formatAdaQuantity} from '../../helpers/formatAssetQuantity'
+import {formatDateTime} from '../../helpers/formatDate'
 import {useSignAndSubmitTxMutation} from '../../helpers/transaction'
 import {type CollectionState, useCollectionStore} from '../../store/collection'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
@@ -99,9 +99,8 @@ const MintPage = () => {
             <FormField label="Mint end date">
               <Paragraph>
                 {collection.mintEndDate
-                  ? `Minting of NFTs in this collection will be enabled until ${format(
+                  ? `Minting of NFTs in this collection will be enabled until ${formatDateTime(
                       collection.mintEndDate,
-                      'dd/MM/yyyy HH:mm',
                     )}`
                   : 'Mint end date not set. Minting of NFTs in this collection will be enabled indefinitely.'}
               </Paragraph>
@@ -164,6 +163,7 @@ const MintPage = () => {
       </Page>
 
       <MintSuccessModal
+        collection={collection}
         buildMintTxResult={buildTxData}
         signAndSubmitData={signAndSubmitTxData}
         onClose={handleSuccessModalClose}

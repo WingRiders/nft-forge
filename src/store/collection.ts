@@ -20,13 +20,19 @@ export type NFTData = {
 
 export type CollectionState = {
   lastSubmittedStep?: CollectionStateStep
+  existingCollectionId?: string
   uuid?: string
   website?: string
   mintEndDate?: number
   nftsData?: Record<string, NFTData>
   isRehydrated?: boolean
 
-  setCollectionData: (data: {website: string; mintEndDate?: number}) => void
+  setCollectionData: (data: {
+    existingCollectionId?: string
+    uuid?: string
+    website?: string
+    mintEndDate?: number
+  }) => void
   addNewNFTsData: (nftsData: NFTData[]) => void
   setNFTsData: (data: Record<string, NFTData>) => void
   deleteNFT: (id: string) => void
@@ -36,7 +42,7 @@ export type CollectionState = {
 export const useCollectionStore = create<CollectionState>()(
   persist(
     (set) => ({
-      setCollectionData: (commonData) => {
+      setCollectionData: ({uuid: newUuid, ...commonData}) => {
         return set(
           ({
             uuid: existingUuid,
@@ -44,7 +50,7 @@ export const useCollectionStore = create<CollectionState>()(
           }) => ({
             ...commonData,
             // if the uuid is already set, use it, otherwise generate a new one
-            uuid: existingUuid ?? uuidV4(),
+            uuid: newUuid ?? existingUuid ?? uuidV4(),
             lastSubmittedStep: Math.max(
               existingLastSubmittedStep ?? 0,
               CollectionStateStep.COLLECTION_DATA,
@@ -94,6 +100,7 @@ export const useCollectionStore = create<CollectionState>()(
       reset: () =>
         set({
           lastSubmittedStep: undefined,
+          existingCollectionId: undefined,
           uuid: undefined,
           website: undefined,
           mintEndDate: undefined,
