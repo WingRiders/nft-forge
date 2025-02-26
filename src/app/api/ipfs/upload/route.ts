@@ -1,4 +1,4 @@
-import {fileTypeFromBlob} from 'file-type'
+import {fileTypeFromBuffer} from 'file-type'
 import {IPFS_UPLOAD_ERRORS} from '../../../../api/errors'
 import type {ApiIpfsUploadResponse} from '../../../../api/types/ipfs'
 import {ipfsProvider} from '../../../../config'
@@ -35,7 +35,8 @@ export const POST = async (request: Request) => {
       {status: 400},
     )
 
-  const fileType = await fileTypeFromBlob(file)
+  const fileBuffer = Buffer.from(await file.arrayBuffer())
+  const fileType = await fileTypeFromBuffer(fileBuffer)
   if (!fileType)
     return Response.json(
       {error: IPFS_UPLOAD_ERRORS.INVALID_FILE_TYPE},

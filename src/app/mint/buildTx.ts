@@ -24,6 +24,7 @@ type BuildMintTxArgs = {
     'uuid' | 'website' | 'mintEndDate' | 'nftsData'
   >
   wallet: BrowserWallet
+  now?: Date // if not provided, the current date will be used
 }
 
 export type BuildMintTxResult = {
@@ -35,6 +36,7 @@ export type BuildMintTxResult = {
 export const buildMintTx = async ({
   collection,
   wallet,
+  now = new Date(),
 }: BuildMintTxArgs): Promise<BuildMintTxResult> => {
   if (!collection.nftsData || Object.keys(collection.nftsData).length === 0) {
     throw new Error('No NFTs to mint')
@@ -42,7 +44,6 @@ export const buildMintTx = async ({
   if (!collection.uuid) {
     throw new Error('Collection UUID is required')
   }
-  const now = new Date()
 
   if (collection.mintEndDate != null && isBefore(collection.mintEndDate, now)) {
     throw new Error('Cannot mint NFTs after the mint end date')

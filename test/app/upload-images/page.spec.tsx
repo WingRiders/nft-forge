@@ -13,7 +13,7 @@ vi.mock('next/navigation', () => ({
   })),
 }))
 
-describe('UploadImages', () => {
+describe('UploadImagesPage', () => {
   test('should be able to upload images', async () => {
     vi.mocked(axios.post).mockImplementationOnce(() => {
       const mockedResponse: ApiIpfsUploadResponse = {

@@ -24,7 +24,7 @@ export const supportedWalletsInfo: Record<SupportedWalletType, WalletInfo> = {
     id: 'eternl',
   },
   [SupportedWalletType.NUFI]: {
-    name: 'Nufi',
+    name: 'NuFi',
     icon: nufiIcon,
     id: 'nufi',
   },

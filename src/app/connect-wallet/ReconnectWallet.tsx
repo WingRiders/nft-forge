@@ -40,7 +40,7 @@ export const ReconnectWallet = () => {
         } catch (error) {
           disconnectWallet()
           router.push('/connect-wallet')
-          throw error
+          console.error(error)
         }
       }
     }

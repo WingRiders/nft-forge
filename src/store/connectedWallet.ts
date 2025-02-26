@@ -13,7 +13,7 @@ type ConnectedWallet = {
   network: Network
 }
 
-type ConnectedWalletState = {
+export type ConnectedWalletState = {
   connectedWalletType: SupportedWalletType | null
   connectedWallet: ConnectedWallet | null
   isWalletConnecting: boolean

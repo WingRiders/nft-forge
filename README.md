@@ -58,3 +58,5 @@ bun run dev
 ```
 npm run test
 ```
+
+You can find more information about tests in [tests.md](./docs/tests.md).
