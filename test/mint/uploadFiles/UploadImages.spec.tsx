@@ -15,6 +15,7 @@ describe('UploadImages', () => {
         cid: 'a',
         name: 'image.png',
         size: 100,
+        mimeType: 'image/png',
       }
       return Promise.resolve({data: mockedResponse})
     })

@@ -1,9 +1,5 @@
-import {fileTypeFromBlob} from 'file-type'
-
-export const isFileImage = async (file: File) => {
-  const fileType = await fileTypeFromBlob(file)
-  return !!fileType?.mime.startsWith('image')
-}
+export const isMimeTypeImage = async (mimeType: string) =>
+  mimeType.startsWith('image')
 
 export const isFile = (file: unknown): file is File =>
   file instanceof File ||

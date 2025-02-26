@@ -1,8 +1,9 @@
+import {fileTypeFromBlob} from 'file-type'
 import {IPFS_UPLOAD_ERRORS} from '../../../../api/errors'
 import type {ApiIpfsUploadResponse} from '../../../../api/types/ipfs'
 import {ipfsProvider} from '../../../../config'
 import {MAX_FILE_SIZE_MB} from '../../../../constants'
-import {isFile, isFileImage, mbToBytes} from '../../../../helpers/file'
+import {isFile, isMimeTypeImage, mbToBytes} from '../../../../helpers/file'
 
 export const POST = async (request: Request) => {
   let formData: FormData | undefined = undefined
@@ -34,7 +35,14 @@ export const POST = async (request: Request) => {
       {status: 400},
     )
 
-  const isImage = await isFileImage(file)
+  const fileType = await fileTypeFromBlob(file)
+  if (!fileType)
+    return Response.json(
+      {error: IPFS_UPLOAD_ERRORS.INVALID_FILE_TYPE},
+      {status: 400},
+    )
+
+  const isImage = await isMimeTypeImage(fileType.mime)
   if (!isImage)
     return Response.json(
       {error: IPFS_UPLOAD_ERRORS.INVALID_FILE_TYPE},
@@ -48,6 +56,7 @@ export const POST = async (request: Request) => {
       name: res.name,
       size: res.size,
       cid: res.cid,
+      mimeType: fileType.mime,
     }
     return Response.json(response)
   } catch {

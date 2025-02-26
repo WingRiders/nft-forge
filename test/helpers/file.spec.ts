@@ -1,14 +1,9 @@
-import {type FileExtension, type MimeType, fileTypeFromBlob} from 'file-type'
-import {describe, expect, test, vi} from 'vitest'
-import {isFileImage} from '../../src/helpers/file'
-
-vi.mock('file-type', () => ({
-  fileTypeFromBlob: vi.fn(),
-}))
+import {describe, expect, test} from 'vitest'
+import {isMimeTypeImage} from '../../src/helpers/file'
 
 describe('file', () => {
-  describe('isFileImage ', () => {
-    const testCases: [mime: MimeType, expected: boolean][] = [
+  describe('isMimeTypeImage ', () => {
+    const testCases: [mime: string, expected: boolean][] = [
       ['image/png', true],
       ['image/jpeg', true],
       ['image/gif', true],
@@ -19,12 +14,7 @@ describe('file', () => {
     test.each(testCases)(
       'If file mime is %s, isFileImage should return %s',
       async (mime, expected) => {
-        vi.mocked(fileTypeFromBlob).mockResolvedValueOnce({
-          mime,
-          ext: '' as FileExtension,
-        })
-
-        expect(await isFileImage({} as File)).toBe(expected)
+        expect(await isMimeTypeImage(mime)).toBe(expected)
       },
     )
   })

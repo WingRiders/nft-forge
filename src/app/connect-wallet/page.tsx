@@ -100,7 +100,7 @@ const ConnectWalletPage = () => {
                 </Stack>
 
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  <Button linkTo="/upload-images">Continue</Button>
+                  <Button linkTo="/collection-data">Continue</Button>
                 </Stack>
               </Stack>
             ) : (

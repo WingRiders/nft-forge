@@ -15,10 +15,20 @@ const mintStepsInfo: Record<
     href: '/connect-wallet',
     label: 'Connect wallet',
   },
+  [MintStep.COLLECTION_DATA]: {
+    index: 1,
+    href: '/collection-data',
+    label: 'Collection data',
+  },
   [MintStep.UPLOAD_IMAGES]: {
     index: 2,
     href: '/upload-images',
     label: 'Upload images',
+  },
+  [MintStep.NFTS_DATA]: {
+    index: 3,
+    href: '/nfts-data',
+    label: 'NFTs data',
   },
 }
 

@@ -37,6 +37,7 @@ describe('/upload route', () => {
       name: ipfsUploadResponse.name,
       size: ipfsUploadResponse.size,
       cid: ipfsUploadResponse.cid,
+      mimeType: 'image/png',
     }
     const response = await postUploadResolver(req)
     expect(response.status).toEqual(200)

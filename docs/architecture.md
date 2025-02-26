@@ -88,6 +88,8 @@ The response from this endpoint is a JSON object containing essential informatio
 
 - **`cid`**: the Content Identifier (CID) associated with the uploaded file in the IPFS system. This unique identifier is generated based on the file's content using IPFS's content-based addressing. It serves as a permanent reference to the file, enabling retrieval from the IPFS network without relying on traditional location-based storage paths
 
+- **`mimeType`**: the MIME type of the uploaded image
+
 **Example response:**
 
 ```json

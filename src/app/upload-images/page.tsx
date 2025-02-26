@@ -52,10 +52,15 @@ const UploadImagesPage = () => {
     setImagesToUpload([])
 
     setNFTsData(
-      uploadedImages.map(({cid, name}) => ({
-        imageIpfsCid: cid,
-        name: name.split('.').slice(0, -1).join('.'), // remove file extension from name
-      })),
+      uploadedImages.map(({cid, name, mimeType}) => {
+        const nameWithoutExtension = name.split('.').slice(0, -1).join('.')
+        return {
+          imageIpfsCid: cid,
+          imageMimeType: mimeType,
+          name: nameWithoutExtension,
+          assetNameUtf8: nameWithoutExtension,
+        }
+      }),
       true,
     )
   }
@@ -215,7 +220,7 @@ const UploadImagesPage = () => {
 
             {imagesToUpload.length === 0 && (
               <Stack alignItems="flex-end" mt={5}>
-                <Button>Continue</Button>
+                <Button linkTo="/nfts-data">Continue</Button>
               </Stack>
             )}
           </Stack>
