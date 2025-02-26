@@ -1,7 +1,9 @@
 'use client'
 
+import type {BrowserWallet} from '@meshsdk/core'
 import CheckIcon from '@mui/icons-material/Check'
-import {Alert, Grid2, Stack} from '@mui/material'
+import {Alert, AlertTitle, Box, Grid2, Stack} from '@mui/material'
+import {type QueryFunction, useMutation, useQuery} from '@tanstack/react-query'
 import {useState} from 'react'
 import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
@@ -10,8 +12,10 @@ import {FormField} from '../../components/FormField'
 import {MintStepper} from '../../components/MintStepper'
 import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
+import {Skeleton} from '../../components/Skeleton'
 import {Spinner} from '../../components/Spinner'
 import {SupportedWalletImage} from '../../components/SupportedWalletImage'
+import {Tooltip} from '../../components/Tooltips/Tooltip'
 import {Heading} from '../../components/Typography/Heading'
 import {Label} from '../../components/Typography/Label'
 import {Paragraph} from '../../components/Typography/Paragraph'
@@ -20,11 +24,26 @@ import {useConnectedWalletStore} from '../../store/connectedWallet'
 import {MintStep} from '../../types'
 import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 import {WalletItem} from './WalletItem'
+import {buildAndSubmitSetCollateralTx} from './buildSetCollateralTx'
 import {useInstalledWalletsIdsQuery} from './queries'
 import {
   type SupportedWalletType,
   supportedWalletsInfo,
 } from './supportedWallets'
+
+const getHasCollateralQueryFn: QueryFunction<
+  boolean,
+  [string, BrowserWallet | undefined]
+> = async ({queryKey}) => {
+  const [, wallet] = queryKey
+
+  if (!wallet) {
+    throw new Error('Wallet not connected')
+  }
+
+  const c = await wallet.getCollateral()
+  return c.length > 0
+}
 
 const ConnectWalletPage = () => {
   const [connectWalletError, setConnectWalletError] = useState<Error | null>(
@@ -48,6 +67,26 @@ const ConnectWalletPage = () => {
       ),
     )
 
+  const {
+    data: hasCollateral,
+    isLoading: isLoadingHasCollateral,
+    error: hasCollateralError,
+  } = useQuery({
+    queryKey: ['has-collateral', connectedWallet?.wallet],
+    queryFn: getHasCollateralQueryFn,
+    enabled: !!connectedWallet,
+    refetchOnMount: true,
+  })
+
+  const {
+    mutate: setCollateral,
+    isPending: isSettingCollateral,
+    error: setCollateralError,
+    data: setCollateralData,
+  } = useMutation({
+    mutationFn: buildAndSubmitSetCollateralTx,
+  })
+
   const {data: installedWalletsIds, isLoading: isLoadingInstalledWalletsIds} =
     useInstalledWalletsIdsQuery()
 
@@ -59,6 +98,13 @@ const ConnectWalletPage = () => {
       setConnectWalletError(error as Error)
     }
   }
+
+  const handleSetCollateralClick = () => {
+    if (!connectedWallet) return
+    setCollateral(connectedWallet.wallet)
+  }
+
+  const hasSetCollateral = !!hasCollateral || !!setCollateralData
 
   return (
     <Page>
@@ -121,13 +167,87 @@ const ConnectWalletPage = () => {
                   <FormField label="Network">
                     <Paragraph>{connectedWallet.network}</Paragraph>
                   </FormField>
+                  <FormField
+                    label="Collateral"
+                    tooltip="To submit a smart contract transaction on the Cardano blockchain, you need to have a collateral set in your wallet. Collateral is typically a 5 ADA UTxO on your address that is returned when the transaction is successfully submitted to the blockchain."
+                  >
+                    <Skeleton if={isLoadingHasCollateral} fullWidth>
+                      <Stack>
+                        {hasCollateralError ? (
+                          <Paragraph
+                            sx={({palette}) => ({color: palette.error.main})}
+                          >
+                            Error while checking collateral
+                          </Paragraph>
+                        ) : hasSetCollateral ? (
+                          <Paragraph
+                            sx={({palette}) => ({color: palette.success.main})}
+                          >
+                            Collateral set
+                          </Paragraph>
+                        ) : (
+                          <Stack
+                            direction="row"
+                            spacing={5}
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Paragraph
+                              sx={({palette}) => ({
+                                color: palette.warning.main,
+                              })}
+                            >
+                              Collateral not set
+                            </Paragraph>
+                            <Button
+                              color="secondary"
+                              size="extra-small"
+                              disabled={isSettingCollateral}
+                              loading={isSettingCollateral && 'inline'}
+                              onClick={handleSetCollateralClick}
+                            >
+                              Set collateral
+                            </Button>
+                          </Stack>
+                        )}
+                      </Stack>
+                    </Skeleton>
+                  </FormField>
+
+                  {setCollateralError && (
+                    <Alert severity="error" sx={{mt: 4}}>
+                      <AlertTitle>Error while setting collateral</AlertTitle>
+                      {setCollateralError.message ||
+                        ('info' in setCollateralError &&
+                        typeof setCollateralError.info === 'string'
+                          ? setCollateralError.info
+                          : undefined) ||
+                        'Unknown error'}
+                    </Alert>
+                  )}
+
                   <Button color="secondary" onClick={disconnectWallet}>
                     Disconnect
                   </Button>
                 </Stack>
 
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  <Button linkTo="/collection-data">Continue</Button>
+                  <Tooltip
+                    title={
+                      !hasSetCollateral && !isLoadingHasCollateral
+                        ? 'Set collateral to continue'
+                        : undefined
+                    }
+                  >
+                    <Box>
+                      <Button
+                        linkTo="/collection-data"
+                        disabled={!hasSetCollateral}
+                      >
+                        Continue
+                      </Button>
+                    </Box>
+                  </Tooltip>
                 </Stack>
               </Stack>
             ) : (
