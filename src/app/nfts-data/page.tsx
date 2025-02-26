@@ -1,6 +1,7 @@
 'use client'
 
 import {Divider, Stack} from '@mui/material'
+import {useRouter} from 'next/navigation'
 import {Fragment} from 'react'
 import {type SubmitHandler, useForm} from 'react-hook-form'
 import {useShallow} from 'zustand/shallow'
@@ -15,6 +16,8 @@ import {NFTDataInput} from './NFTDataInput'
 import type {NFTsDataInputs} from './types'
 
 const NFTsDataPage = () => {
+  const router = useRouter()
+
   const {nftsData, setNFTsData} = useCollectionStore(
     useShallow(({nftsData, setNFTsData}) => ({nftsData, setNFTsData})),
   )
@@ -33,6 +36,7 @@ const NFTsDataPage = () => {
 
   const onSubmit: SubmitHandler<NFTsDataInputs> = ({nftsData}) => {
     setNFTsData(nftsData)
+    router.push('/mint')
   }
 
   return (

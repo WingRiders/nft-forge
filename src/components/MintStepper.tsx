@@ -30,6 +30,11 @@ const mintStepsInfo: Record<
     href: '/nfts-data',
     label: 'NFTs data',
   },
+  [MintStep.MINT]: {
+    index: 4,
+    href: '/mint',
+    label: 'Mint',
+  },
 }
 
 export const MintStepper = ({step, sx}: MintStepperProps) => {
