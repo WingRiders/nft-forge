@@ -16,20 +16,7 @@ Architecture of the project can be found in the [architecture.md](./docs/archite
 
 ### Bun
 
-This project uses [Bun](https://bun.sh/) as the package manager and as the runtime (expect for running tests). If you don't have Bun installed, you can follow the installation guide on their website.
-
-### Node.js
-
-This project uses [Node.js](https://nodejs.org/) as the runtime for tests. Bun cannot be used as the test runtime due to issues with constructing mocked HTTP requests containing form data and using them to test endpoints.
-
-We recommend using [`nvm` (Node Version Manager)](https://github.com/nvm-sh/nvm) to manage your Node.js versions efficiently.
-
-Version of Node.js that this repository uses is in `.nvmrc` file. Run:
-
-```sh
-nvm install
-nvm use
-```
+This project uses [Bun](https://bun.sh/) as the package manager and as the runtime. If you don't have Bun installed, you can follow the installation guide on their website.
 
 ### Environment variables
 

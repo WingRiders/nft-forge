@@ -35,7 +35,7 @@ export const POST = async (request: Request) => {
       {status: 400},
     )
 
-  const fileBuffer = Buffer.from(await file.arrayBuffer())
+  const fileBuffer = new Uint8Array(await file.arrayBuffer())
   const fileType = await fileTypeFromBuffer(fileBuffer)
   if (!fileType)
     return Response.json(

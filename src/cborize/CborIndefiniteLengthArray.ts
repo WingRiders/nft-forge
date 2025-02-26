@@ -10,9 +10,9 @@ export class CborIndefiniteLengthArray {
   encodeCBOR(encoder: any) {
     return encoder.push(
       Buffer.concat([
-        Buffer.from([0x9f]), // indefinite array prefix
-        ...this.elements.map((e) => encode(e)),
-        Buffer.from([0xff]), // end of array
+        new Uint8Array([0x9f]), // indefinite array prefix
+        ...this.elements.map((e) => new Uint8Array(encode(e))),
+        new Uint8Array([0xff]), // end of array
       ]),
     )
   }

@@ -10,8 +10,8 @@ export class CborDefiniteLengthArray {
   encodeCBOR(encoder: any) {
     return encoder.push(
       Buffer.concat([
-        Buffer.from([0x80 + this.elements.length]),
-        ...this.elements.map((e) => encode(e)),
+        new Uint8Array([0x80 + this.elements.length]),
+        ...this.elements.map((e) => new Uint8Array(encode(e))),
       ]),
     )
   }

@@ -25,8 +25,8 @@ export const applyParamsToMinterScript = async ({
     '@wingriders/apply-params-to-script'
   )
   const appliedScript = await applyParamsToScript(
-    paramsEncoded,
-    Buffer.from(UNAPPLIED_MINTER_SCRIPT, 'hex'),
+    new Uint8Array(paramsEncoded),
+    new Uint8Array(Buffer.from(UNAPPLIED_MINTER_SCRIPT, 'hex')),
   )
 
   return encodeCbor(Buffer.from(appliedScript).toString('hex'))
