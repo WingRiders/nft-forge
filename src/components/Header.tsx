@@ -1,16 +1,23 @@
 'use client'
 
 import {AppBar, Stack, useScrollTrigger} from '@mui/material'
+import {useShallow} from 'zustand/shallow'
 import type {SupportedWalletType} from '../app/connect-wallet/supportedWallets'
 import {shortLabel} from '../helpers/shortLabel'
 import {useConnectedWalletStore} from '../store/connectedWallet'
+import {Spinner} from './Spinner'
 import {SupportedWalletImage} from './SupportedWalletImage'
 import {Heading} from './Typography/Heading'
 import {Paragraph} from './Typography/Paragraph'
 
 export const Header = () => {
   const scrolled = useScrollTrigger({threshold: 20, disableHysteresis: true})
-  const connectedWallet = useConnectedWalletStore((s) => s.connectedWallet)
+  const {connectedWallet, isWalletConnecting} = useConnectedWalletStore(
+    useShallow(({connectedWallet, isWalletConnecting}) => ({
+      connectedWallet,
+      isWalletConnecting,
+    })),
+  )
 
   return (
     <AppBar
@@ -50,6 +57,7 @@ export const Header = () => {
             />
           </Stack>
         )}
+        {isWalletConnecting && <Spinner size={25} />}
       </Stack>
     </AppBar>
   )

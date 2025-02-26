@@ -7,6 +7,11 @@ import {mbToBytes} from '../../../src/helpers/file'
 import {fireEvent, render, screen} from '../../utils'
 
 vi.mock('axios')
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+  })),
+}))
 
 describe('UploadImages', () => {
   test('should be able to upload images', async () => {

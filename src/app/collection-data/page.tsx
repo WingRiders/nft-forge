@@ -17,6 +17,7 @@ import {Paragraph} from '../../components/Typography/Paragraph'
 import {getErrorMessage} from '../../helpers/forms'
 import {useCollectionStore} from '../../store/collection'
 import {MintStep} from '../../types'
+import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 
 const WEBSITE_URL_PATTERN =
   /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/
@@ -33,12 +34,12 @@ const CollectionDataPage = () => {
   const router = useRouter()
 
   const {
-    submitCommonData,
+    setCollectionData,
     website: websiteInStore,
     mintEndDate: mintEndDateInStore,
   } = useCollectionStore(
-    useShallow(({submitCommonData, website, mintEndDate}) => ({
-      submitCommonData,
+    useShallow(({setCollectionData, website, mintEndDate}) => ({
+      setCollectionData,
       website,
       mintEndDate,
     })),
@@ -63,7 +64,7 @@ const CollectionDataPage = () => {
     website,
     mintEndDate,
   }) => {
-    submitCommonData({website, mintEndDate: mintEndDate ?? undefined})
+    setCollectionData({website, mintEndDate: mintEndDate ?? undefined})
     router.push('/upload-images')
   }
 
@@ -71,7 +72,8 @@ const CollectionDataPage = () => {
 
   return (
     <Page>
-      <MintStepper step={MintStep.COLLECTION_DATA} sx={{mt: 3, mb: 5}} />
+      <MintStepper activeStep={MintStep.COLLECTION_DATA} sx={{mt: 3, mb: 5}} />
+      <MintFlowNavigationRedirect activeStep={MintStep.COLLECTION_DATA} />
 
       <Paper title="Collection data">
         <Stack spacing={5}>

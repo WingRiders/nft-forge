@@ -1,12 +1,16 @@
 import {Step, StepLabel, Stepper, type StepperProps} from '@mui/material'
 import Link from 'next/link'
+import {useShallow} from 'zustand/shallow'
+import {getLatestAvailableMintStep} from '../app/MintFlowNavigationRedirect'
+import {useCollectionStore} from '../store/collection'
+import {useConnectedWalletStore} from '../store/connectedWallet'
 import {MintStep} from '../types'
 
 type MintStepperProps = {
-  step: MintStep
+  activeStep: MintStep
 } & Pick<StepperProps, 'sx'>
 
-const mintStepsInfo: Record<
+export const mintStepsInfo: Record<
   MintStep,
   {index: number; href: string; label: string}
 > = {
@@ -37,21 +41,68 @@ const mintStepsInfo: Record<
   },
 }
 
-export const MintStepper = ({step, sx}: MintStepperProps) => {
-  const activeStepIndex = mintStepsInfo[step].index
+export const MintStepper = ({activeStep, sx}: MintStepperProps) => {
+  const activeStepIndex = mintStepsInfo[activeStep].index
+
+  const hasConnectedWallet = useConnectedWalletStore(
+    useShallow(({connectedWalletType}) => connectedWalletType != null),
+  )
+
+  const {lastSubmittedStep: lastSubmittedCollectionStateStep} =
+    useCollectionStore(
+      useShallow(({lastSubmittedStep}) => ({
+        lastSubmittedStep,
+      })),
+    )
+
+  const latestAvailableMintStep = getLatestAvailableMintStep(
+    lastSubmittedCollectionStateStep,
+    hasConnectedWallet,
+  )
+  const latestAvailableMintStepIndex =
+    mintStepsInfo[latestAvailableMintStep].index
 
   return (
-    <Stepper activeStep={activeStepIndex} alternativeLabel sx={sx}>
+    <Stepper
+      activeStep={latestAvailableMintStepIndex}
+      alternativeLabel
+      nonLinear
+      sx={sx}
+    >
       {Object.values(mintStepsInfo)
         .toSorted((a, b) => a.index - b.index)
-        .map(({label, index, href}) => (
-          <Step
-            key={index}
-            {...(index < activeStepIndex ? {component: Link, href} : {})}
-          >
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
+        .map(({label, index, href}) => {
+          const isActive = index === activeStepIndex
+
+          return (
+            <Step
+              key={index}
+              {...(index <= latestAvailableMintStepIndex && !isActive
+                ? {component: Link, href}
+                : {})}
+              completed={index < latestAvailableMintStepIndex}
+            >
+              <StepLabel
+                sx={({palette}) => {
+                  const color = isActive
+                    ? palette.text.primary
+                    : palette.text.secondary
+
+                  return {
+                    '& .MuiStepLabel-label.Mui-completed': {
+                      color,
+                    },
+                    '& .MuiStepLabel-label.Mui-active': {
+                      color,
+                    },
+                  }
+                }}
+              >
+                {label}
+              </StepLabel>
+            </Step>
+          )
+        })}
     </Stepper>
   )
 }

@@ -11,6 +11,7 @@ import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
 import {useCollectionStore} from '../../store/collection'
 import {MintStep} from '../../types'
+import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 import {CollectionValidation} from './CollectionValidation'
 import {NFTDataInput} from './NFTDataInput'
 import type {NFTsDataInputs} from './types'
@@ -41,11 +42,12 @@ const NFTsDataPage = () => {
 
   return (
     <Page>
-      <MintStepper step={MintStep.NFTS_DATA} sx={{mt: 3, mb: 5}} />
+      <MintStepper activeStep={MintStep.NFTS_DATA} sx={{mt: 3, mb: 5}} />
+      <MintFlowNavigationRedirect activeStep={MintStep.NFTS_DATA} />
 
       <Paper title="NFTs data">
         <Stack>
-          {nftsData.map((_nftData, index) => (
+          {nftsData?.map((_nftData, index) => (
             <Fragment key={index}>
               {index > 0 && (
                 <Divider

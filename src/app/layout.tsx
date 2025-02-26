@@ -7,6 +7,7 @@ import {Header} from '../components/Header'
 import {QueryProvider} from '../query/QueryProvider'
 import {theme} from '../theme'
 import {LocalizationProvider} from './LocalizationProvider'
+import {ReconnectWallet} from './connect-wallet/ReconnectWallet'
 
 export const metadata: Metadata = {
   title: 'NFT Forge',
@@ -31,6 +32,7 @@ export default function RootLayout({
             <ThemeProvider theme={theme}>
               <LocalizationProvider>
                 <Header />
+                <ReconnectWallet />
                 {children}
                 <AppBackground />
               </LocalizationProvider>

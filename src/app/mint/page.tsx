@@ -16,6 +16,7 @@ import {useSignAndSubmitTxMutation} from '../../helpers/transaction'
 import {type CollectionState, useCollectionStore} from '../../store/collection'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
 import {MintStep} from '../../types'
+import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 import {MintSuccessModal} from './MintSuccessModal'
 import {NFTDisplay} from './NFTDisplay'
 import {buildMintTx} from './buildTx'
@@ -82,10 +83,12 @@ const MintPage = () => {
   return (
     <>
       <Page>
-        <MintStepper step={MintStep.MINT} sx={{mt: 3, mb: 5}} />
+        <MintStepper activeStep={MintStep.MINT} sx={{mt: 3, mb: 5}} />
+        <MintFlowNavigationRedirect activeStep={MintStep.MINT} />
+
         <Paper title="Mint">
           <Stack spacing={4}>
-            {collection.nftsData.map((nftData, index) => (
+            {collection.nftsData?.map((nftData, index) => (
               <Fragment key={index}>
                 {index > 0 && (
                   <Divider
@@ -124,11 +127,13 @@ const MintPage = () => {
             fullWidth
             size="large"
           >
-            Mint {collection.nftsData.length}{' '}
-            {pluralize('NFT', collection.nftsData.length)}
-            {buildTxData
-              ? ` (${formatAdaQuantity(buildTxData.txFee)})`
-              : undefined}
+            {collection.nftsData && collection.nftsData.length > 0
+              ? `Mint ${collection.nftsData.length} ${pluralize('NFT', collection.nftsData.length)}${
+                  buildTxData
+                    ? ` (${formatAdaQuantity(buildTxData.txFee)})`
+                    : ''
+                }`
+              : 'Mint'}
           </Button>
         </Paper>
       </Page>

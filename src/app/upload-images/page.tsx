@@ -19,11 +19,12 @@ import {ipfsCidToHttps} from '../../helpers/ipfs'
 import {uploadFiles} from '../../query/ipfs'
 import {useCollectionStore} from '../../store/collection'
 import {MintStep} from '../../types'
+import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 import {NFTImagePreview} from './NFTImagePreview'
 
 const UploadImagesPage = () => {
-  const {nftsData, setNFTsData} = useCollectionStore(
-    useShallow(({nftsData, setNFTsData}) => ({nftsData, setNFTsData})),
+  const {nftsData, addNewNFTsData} = useCollectionStore(
+    useShallow(({nftsData, addNewNFTsData}) => ({nftsData, addNewNFTsData})),
   )
 
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([])
@@ -51,7 +52,7 @@ const UploadImagesPage = () => {
     const uploadedImages = await uploadImages(imagesToUpload)
     setImagesToUpload([])
 
-    setNFTsData(
+    addNewNFTsData(
       uploadedImages.map(({cid, name, mimeType}) => {
         const nameWithoutExtension = name.split('.').slice(0, -1).join('.')
         return {
@@ -61,13 +62,13 @@ const UploadImagesPage = () => {
           assetNameUtf8: nameWithoutExtension,
         }
       }),
-      true,
     )
   }
 
   return (
     <Page>
-      <MintStepper step={MintStep.UPLOAD_IMAGES} sx={{mt: 3, mb: 5}} />
+      <MintStepper activeStep={MintStep.UPLOAD_IMAGES} sx={{mt: 3, mb: 5}} />
+      <MintFlowNavigationRedirect activeStep={MintStep.UPLOAD_IMAGES} />
 
       <Paper title="Upload images">
         <Paragraph variant="long">
@@ -192,7 +193,7 @@ const UploadImagesPage = () => {
           </Button>
         )}
 
-        {nftsData.length > 0 && (
+        {nftsData && nftsData.length > 0 && (
           <Stack mt={3}>
             <Stack
               spacing={2}

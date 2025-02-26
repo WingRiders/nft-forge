@@ -36,7 +36,7 @@ export const buildMintTx = async ({
   collection,
   wallet,
 }: BuildMintTxArgs): Promise<BuildMintTxResult> => {
-  if (collection.nftsData.length === 0) {
+  if (!collection.nftsData || collection.nftsData.length === 0) {
     throw new Error('No NFTs to mint')
   }
   if (!collection.uuid) {

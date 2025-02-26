@@ -2,12 +2,14 @@
 
 import CheckIcon from '@mui/icons-material/Check'
 import {Alert, Grid2, Stack} from '@mui/material'
+import {useState} from 'react'
 import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
 import {CssSpinner} from '../../components/CssSpinner'
 import {MintStepper} from '../../components/MintStepper'
 import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
+import {Spinner} from '../../components/Spinner'
 import {SupportedWalletImage} from '../../components/SupportedWalletImage'
 import {Heading} from '../../components/Typography/Heading'
 import {Label} from '../../components/Typography/Label'
@@ -15,33 +17,52 @@ import {Paragraph} from '../../components/Typography/Paragraph'
 import {Center} from '../../components/utilities'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
 import {MintStep} from '../../types'
+import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 import {WalletItem} from './WalletItem'
-import {useConnectWalletMutation, useInstalledWalletsIdsQuery} from './queries'
+import {useInstalledWalletsIdsQuery} from './queries'
 import {
   type SupportedWalletType,
   supportedWalletsInfo,
 } from './supportedWallets'
 
 const ConnectWalletPage = () => {
-  const {connectedWallet, disconnectWallet} = useConnectedWalletStore(
-    useShallow(({connectedWallet, disconnectWallet}) => ({
-      connectedWallet,
-      disconnectWallet,
-    })),
+  const [connectWalletError, setConnectWalletError] = useState<Error | null>(
+    null,
   )
+
+  const {connectedWallet, disconnectWallet, connectWallet, isWalletConnecting} =
+    useConnectedWalletStore(
+      useShallow(
+        ({
+          connectedWallet,
+          disconnectWallet,
+          connectWallet,
+          isWalletConnecting,
+        }) => ({
+          connectedWallet,
+          disconnectWallet,
+          connectWallet,
+          isWalletConnecting,
+        }),
+      ),
+    )
 
   const {data: installedWalletsIds, isLoading: isLoadingInstalledWalletsIds} =
     useInstalledWalletsIdsQuery()
 
-  const {
-    mutate: connectWallet,
-    isPending: isConnectingWallet,
-    error: connectWalletError,
-  } = useConnectWalletMutation()
+  const handleConnectWalletClick = async (walletType: SupportedWalletType) => {
+    try {
+      setConnectWalletError(null)
+      await connectWallet(walletType)
+    } catch (error) {
+      setConnectWalletError(error as Error)
+    }
+  }
 
   return (
     <Page>
-      <MintStepper step={MintStep.CONNECT_WALLET} sx={{mt: 3, mb: 5}} />
+      <MintStepper activeStep={MintStep.CONNECT_WALLET} sx={{mt: 3, mb: 5}} />
+      <MintFlowNavigationRedirect activeStep={MintStep.CONNECT_WALLET} />
 
       <Paper title="Connect wallet">
         {isLoadingInstalledWalletsIds ? (
@@ -105,19 +126,37 @@ const ConnectWalletPage = () => {
               </Stack>
             ) : (
               <Stack spacing={5} mt={3}>
-                <Grid2 container spacing={2} mt={4}>
-                  {Object.values(supportedWalletsInfo).map(
-                    ({name, icon, id}) => (
+                <Grid2 container spacing={2} mt={4} position="relative">
+                  {Object.entries(supportedWalletsInfo).map(
+                    ([walletType, {name, icon, id}]) => (
                       <Grid2 key={id} size={6}>
                         <WalletItem
                           name={name}
                           icon={icon}
                           isInstalled={installedWalletsIds?.has(id) ?? false}
-                          disabled={isConnectingWallet}
-                          onClick={() => connectWallet(id)}
+                          disabled={isWalletConnecting}
+                          onClick={() =>
+                            handleConnectWalletClick(
+                              walletType as SupportedWalletType,
+                            )
+                          }
                         />
                       </Grid2>
                     ),
+                  )}
+
+                  {isWalletConnecting && (
+                    <Center
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                      }}
+                    >
+                      <Spinner size={30} />
+                    </Center>
                   )}
                 </Grid2>
                 {connectWalletError && (
