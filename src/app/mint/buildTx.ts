@@ -9,7 +9,7 @@ import {
 } from '@meshsdk/core'
 
 import type BigNumber from 'bignumber.js'
-import {addMinutes} from 'date-fns'
+import {addMinutes, isBefore} from 'date-fns'
 import {isCollateralUtxo} from '../../helpers/collateral'
 import {getTxFee} from '../../helpers/transaction'
 import {walletNetworkIdToNetwork} from '../../helpers/wallet'
@@ -19,7 +19,10 @@ import type {CollectionState} from '../../store/collection'
 const VALIDITY_END_OFFSET_MINUTES = 30
 
 type BuildMintTxArgs = {
-  collection: Pick<CollectionState, 'uuid' | 'website' | 'nftsData'>
+  collection: Pick<
+    CollectionState,
+    'uuid' | 'website' | 'mintEndDate' | 'nftsData'
+  >
   wallet: BrowserWallet
 }
 
@@ -39,6 +42,11 @@ export const buildMintTx = async ({
   if (!collection.uuid) {
     throw new Error('Collection UUID is required')
   }
+  const now = new Date()
+
+  if (collection.mintEndDate != null && isBefore(collection.mintEndDate, now)) {
+    throw new Error('Cannot mint NFTs after the mint end date')
+  }
 
   const utxos = await wallet.getUtxos()
   const collateralUtxo = utxos.find(isCollateralUtxo)
@@ -46,14 +54,14 @@ export const buildMintTx = async ({
     throw new Error('No collateral UTxO found')
   }
 
-  const now = new Date()
   const changeAddress = await wallet.getChangeAddress()
   const network = walletNetworkIdToNetwork(await wallet.getNetworkId())
+  let txValidityEndTime = addMinutes(now, VALIDITY_END_OFFSET_MINUTES).getTime()
+  if (collection.mintEndDate) {
+    txValidityEndTime = Math.min(txValidityEndTime, collection.mintEndDate)
+  }
   const txValidityEndSlot = Number.parseInt(
-    resolveSlotNo(
-      network,
-      addMinutes(now, VALIDITY_END_OFFSET_MINUTES).getTime(),
-    ),
+    resolveSlotNo(network, txValidityEndTime),
     10,
   )
 
@@ -62,6 +70,7 @@ export const buildMintTx = async ({
   const minterScript = await applyParamsToMinterScript({
     collectionIdHex: Buffer.from(collection.uuid, 'utf-8').toString('hex'),
     authorityKeyHex,
+    endDate: collection.mintEndDate,
   })
   const policyId = resolveScriptHash(minterScript, 'V3')
 

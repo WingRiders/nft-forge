@@ -13,8 +13,9 @@ export type NFTData = {
 export type CollectionState = {
   uuid?: string
   website?: string
+  mintEndDate?: number
   nftsData: NFTData[]
-  submitCommonData: (data: {website: string}) => void
+  submitCommonData: (data: {website: string; mintEndDate?: number}) => void
   setNFTsData: (data: NFTData[], append?: boolean) => void
   reset: () => void
 }

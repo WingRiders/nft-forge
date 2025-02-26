@@ -6,6 +6,7 @@ import {AppBackground} from '../components/AppBackground'
 import {Header} from '../components/Header'
 import {QueryProvider} from '../query/QueryProvider'
 import {theme} from '../theme'
+import {LocalizationProvider} from './LocalizationProvider'
 
 export const metadata: Metadata = {
   title: 'NFT Forge',
@@ -28,9 +29,11 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <QueryProvider>
             <ThemeProvider theme={theme}>
-              <Header />
-              {children}
-              <AppBackground />
+              <LocalizationProvider>
+                <Header />
+                {children}
+                <AppBackground />
+              </LocalizationProvider>
             </ThemeProvider>
           </QueryProvider>
         </AppRouterCacheProvider>
