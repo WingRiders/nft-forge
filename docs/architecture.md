@@ -17,7 +17,7 @@ This repository contains a Next.js project that serves as the core of the applic
       The frontend server is responsible for serving static assets, such as JavaScript, HTML, and CSS, to the browser-based frontend app. It also performs server-side rendering (SSR) for certain pages to enhance SEO and improve initial page load times. This server ensures the frontend app is delivered efficiently to the user’s browser.
 
 2. **Frontend app**: application that runs in the user's browser.  
-   The browser-based frontend app provides users with an intuitive interface for connecting to a Cardano wallet and uploading NFTs images to IPFS. The app communicates directly with the backend API to process user inputs and manage interactions with external services. It also integrates with wallets for retrieving data from the Cardano blockchain.
+   The browser-based frontend app provides users with an intuitive interface for connecting to a Cardano wallet, uploading NFTs images to IPFS and minting NFTs. The app communicates directly with the backend API to process user inputs and manage interactions with external services. It also integrates with wallets for retrieving data from the Cardano blockchain.
 
 3. **Cardano wallet**:  
    The wallet is an external component that acts as a gateway between the frontend app and the Cardano blockchain. It allows users to sign transactions, authorize minting actions, and manage their assets securely. The frontend app communicates with the wallet to initiate these operations.
@@ -163,6 +163,7 @@ The app communicates with the Cardano blockchain indirectly through an integrate
 - [@tanstack/react-query](https://tanstack.com/query/latest) – simplifies data fetching and mutations using React hooks
 - [axios](https://www.axios.com/) – a library for making HTTP requests
 - [Mesh](https://meshjs.dev/) - library for wallet communication and transaction building
+- [zustand](https://github.com/pmndrs/zustand) - library for global state management
 
 ### Error handling
 

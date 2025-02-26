@@ -9,8 +9,8 @@ Architecture of the project can be found in the [architecture.md](./docs/archite
 ## Roadmap
 
 - [x] Backend support for IPFS image upload
-- [ ] Frontend application for minting NFTs
-- [ ] Metadata verification
+- [x] Frontend application for minting NFTs
+- [x] Metadata verification
 
 ## Development
 
