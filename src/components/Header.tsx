@@ -47,14 +47,29 @@ export const Header = () => {
         <Heading variant="h3">NFT Forge</Heading>
 
         {connectedWallet && (
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Paragraph>{shortLabel(connectedWallet.address, 15, 8)}</Paragraph>
-            <SupportedWalletImage
-              walletType={
-                connectedWallet.wallet._walletName as SupportedWalletType
-              }
-              size={20}
-            />
+          <Stack position="relative">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Paragraph>
+                {shortLabel(connectedWallet.address, 15, 8)}
+              </Paragraph>
+              <SupportedWalletImage
+                walletType={
+                  connectedWallet.wallet._walletName as SupportedWalletType
+                }
+                size={20}
+              />
+            </Stack>
+            <Paragraph
+              variant="small"
+              sx={{
+                position: 'absolute',
+                bottom: -2,
+                right: 0,
+                transform: 'translate(0, 100%)',
+              }}
+            >
+              {connectedWallet.network}
+            </Paragraph>
           </Stack>
         )}
         {isWalletConnecting && <Spinner size={25} />}

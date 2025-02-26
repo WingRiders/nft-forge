@@ -11,6 +11,7 @@ import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
 import {useCollectionStore} from '../../store/collection'
 import {MintStep} from '../../types'
+import {DeleteCollection} from '../DeleteCollection'
 import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 import {CollectionValidation} from './CollectionValidation'
 import {NFTDataInput} from './NFTDataInput'
@@ -19,8 +20,12 @@ import type {NFTsDataInputs} from './types'
 const NFTsDataPage = () => {
   const router = useRouter()
 
-  const {nftsData, setNFTsData} = useCollectionStore(
-    useShallow(({nftsData, setNFTsData}) => ({nftsData, setNFTsData})),
+  const {nftsData, setNFTsData, deleteNFT} = useCollectionStore(
+    useShallow(({nftsData, setNFTsData, deleteNFT}) => ({
+      nftsData,
+      setNFTsData,
+      deleteNFT,
+    })),
   )
 
   const {
@@ -40,6 +45,10 @@ const NFTsDataPage = () => {
     router.push('/mint')
   }
 
+  const handleDeleteNFT = (id: string) => {
+    deleteNFT(id)
+  }
+
   return (
     <Page>
       <MintStepper activeStep={MintStep.NFTS_DATA} sx={{mt: 3, mb: 5}} />
@@ -47,21 +56,23 @@ const NFTsDataPage = () => {
 
       <Paper title="NFTs data">
         <Stack>
-          {nftsData?.map((_nftData, index) => (
-            <Fragment key={index}>
-              {index > 0 && (
-                <Divider
-                  sx={({palette}) => ({my: 6, bgcolor: palette.divider})}
+          {nftsData &&
+            Object.values(nftsData).map((nftData, index) => (
+              <Fragment key={nftData.id}>
+                {index > 0 && (
+                  <Divider
+                    sx={({palette}) => ({my: 6, bgcolor: palette.divider})}
+                  />
+                )}
+                <NFTDataInput
+                  id={nftData.id}
+                  register={register}
+                  watch={watch}
+                  errors={errors}
+                  onDelete={() => handleDeleteNFT(nftData.id)}
                 />
-              )}
-              <NFTDataInput
-                index={index}
-                register={register}
-                watch={watch}
-                errors={errors}
-              />
-            </Fragment>
-          ))}
+              </Fragment>
+            ))}
         </Stack>
 
         <CollectionValidation
@@ -74,6 +85,8 @@ const NFTsDataPage = () => {
           <Button onClick={handleSubmit(onSubmit)}>Continue</Button>
         </Stack>
       </Paper>
+
+      <DeleteCollection />
     </Page>
   )
 }

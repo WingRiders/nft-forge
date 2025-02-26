@@ -3,6 +3,7 @@ import './globals.css'
 import {ThemeProvider} from '@mui/material'
 import {AppRouterCacheProvider} from '@mui/material-nextjs/v15-appRouter'
 import {AppBackground} from '../components/AppBackground'
+import {ErrorBoundary} from '../components/ErrorBoundary'
 import {Header} from '../components/Header'
 import {QueryProvider} from '../query/QueryProvider'
 import {theme} from '../theme'
@@ -30,12 +31,14 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <QueryProvider>
             <ThemeProvider theme={theme}>
-              <LocalizationProvider>
-                <Header />
-                <ReconnectWallet />
-                {children}
-                <AppBackground />
-              </LocalizationProvider>
+              <ErrorBoundary>
+                <LocalizationProvider>
+                  <Header />
+                  <ReconnectWallet />
+                  {children}
+                  <AppBackground />
+                </LocalizationProvider>
+              </ErrorBoundary>
             </ThemeProvider>
           </QueryProvider>
         </AppRouterCacheProvider>

@@ -3,14 +3,18 @@
 import type {BrowserWallet} from '@meshsdk/core'
 import {Alert, AlertTitle, Divider, Stack} from '@mui/material'
 import {type QueryFunction, useQuery} from '@tanstack/react-query'
+import {format} from 'date-fns'
 import {useRouter} from 'next/navigation'
 import pluralize from 'pluralize'
 import {Fragment} from 'react'
 import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
+import {FormField} from '../../components/FormField'
 import {MintStepper} from '../../components/MintStepper'
 import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
+import {Heading} from '../../components/Typography/Heading'
+import {Paragraph} from '../../components/Typography/Paragraph'
 import {formatAdaQuantity} from '../../helpers/formatAssetQuantity'
 import {useSignAndSubmitTxMutation} from '../../helpers/transaction'
 import {type CollectionState, useCollectionStore} from '../../store/collection'
@@ -87,17 +91,38 @@ const MintPage = () => {
         <MintFlowNavigationRedirect activeStep={MintStep.MINT} />
 
         <Paper title="Mint">
-          <Stack spacing={4}>
-            {collection.nftsData?.map((nftData, index) => (
-              <Fragment key={index}>
-                {index > 0 && (
-                  <Divider
-                    sx={({palette}) => ({my: 6, bgcolor: palette.divider})}
-                  />
-                )}
-                <NFTDisplay key={index} nftData={nftData} />
-              </Fragment>
-            ))}
+          <Heading variant="h3">Collection data</Heading>
+          <Stack spacing={2} mt={2}>
+            <FormField label="Website">
+              <Paragraph>{collection.website || <i>(Not set)</i>}</Paragraph>
+            </FormField>
+            <FormField label="Mint end date">
+              <Paragraph>
+                {collection.mintEndDate
+                  ? `Minting of NFTs in this collection will be enabled until ${format(
+                      collection.mintEndDate,
+                      'dd/MM/yyyy HH:mm',
+                    )}`
+                  : 'Mint end date not set. Minting of NFTs in this collection will be enabled indefinitely.'}
+              </Paragraph>
+            </FormField>
+          </Stack>
+
+          <Heading variant="h3" mt={8}>
+            NFTs to be minted
+          </Heading>
+          <Stack spacing={4} mt={2}>
+            {collection.nftsData &&
+              Object.values(collection.nftsData).map((nftData, index) => (
+                <Fragment key={nftData.id}>
+                  {index > 0 && (
+                    <Divider
+                      sx={({palette}) => ({my: 6, bgcolor: palette.divider})}
+                    />
+                  )}
+                  <NFTDisplay nftData={nftData} />
+                </Fragment>
+              ))}
           </Stack>
 
           {buildTxError && (
@@ -127,8 +152,8 @@ const MintPage = () => {
             fullWidth
             size="large"
           >
-            {collection.nftsData && collection.nftsData.length > 0
-              ? `Mint ${collection.nftsData.length} ${pluralize('NFT', collection.nftsData.length)}${
+            {collection.nftsData && Object.keys(collection.nftsData).length > 0
+              ? `Mint ${Object.keys(collection.nftsData).length} ${pluralize('NFT', Object.keys(collection.nftsData).length)}${
                   buildTxData
                     ? ` (${formatAdaQuantity(buildTxData.txFee)})`
                     : ''

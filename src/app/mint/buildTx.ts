@@ -36,7 +36,7 @@ export const buildMintTx = async ({
   collection,
   wallet,
 }: BuildMintTxArgs): Promise<BuildMintTxResult> => {
-  if (!collection.nftsData || collection.nftsData.length === 0) {
+  if (!collection.nftsData || Object.keys(collection.nftsData).length === 0) {
     throw new Error('No NFTs to mint')
   }
   if (!collection.uuid) {
@@ -106,7 +106,7 @@ export const buildMintTx = async ({
   > = {}
 
   metadata[policyId] = {}
-  collection.nftsData.forEach(
+  Object.values(collection.nftsData).forEach(
     ({name, description, imageIpfsCid, imageMimeType, assetNameUtf8}) => {
       const assetNameHex = stringToHex(assetNameUtf8)
       metadata[policyId][assetNameHex] = {

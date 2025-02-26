@@ -6,6 +6,7 @@ import {useState} from 'react'
 import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
 import {CssSpinner} from '../../components/CssSpinner'
+import {FormField} from '../../components/FormField'
 import {MintStepper} from '../../components/MintStepper'
 import {Page} from '../../components/Page'
 import {Paper} from '../../components/Paper'
@@ -112,9 +113,14 @@ const ConnectWalletPage = () => {
                     </Stack>
                   </Stack>
 
-                  <Paragraph sx={{wordBreak: 'break-word'}}>
-                    {connectedWallet.address}
-                  </Paragraph>
+                  <FormField label="Address">
+                    <Paragraph sx={{wordBreak: 'break-word'}}>
+                      {connectedWallet.address}
+                    </Paragraph>
+                  </FormField>
+                  <FormField label="Network">
+                    <Paragraph>{connectedWallet.network}</Paragraph>
+                  </FormField>
                   <Button color="secondary" onClick={disconnectWallet}>
                     Disconnect
                   </Button>

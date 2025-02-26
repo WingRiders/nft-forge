@@ -17,7 +17,9 @@ export const CollectionValidation = ({
   const nftsData = useWatch({control, name: 'nftsData'})
 
   const hasDuplicates = useMemo(() => {
-    const assetNames = nftsData?.map((nft) => nft.assetNameUtf8) ?? []
+    const assetNames = Object.values(nftsData ?? {}).map(
+      ({assetNameUtf8}) => assetNameUtf8,
+    )
     return new Set(assetNames).size !== assetNames.length
   }, [nftsData])
 

@@ -19,6 +19,7 @@ import {ipfsCidToHttps} from '../../helpers/ipfs'
 import {uploadFiles} from '../../query/ipfs'
 import {useCollectionStore} from '../../store/collection'
 import {MintStep} from '../../types'
+import {DeleteCollection} from '../DeleteCollection'
 import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
 import {NFTImagePreview} from './NFTImagePreview'
 
@@ -56,6 +57,7 @@ const UploadImagesPage = () => {
       uploadedImages.map(({cid, name, mimeType}) => {
         const nameWithoutExtension = name.split('.').slice(0, -1).join('.')
         return {
+          id: name.replace('.', '-'), // '.' cannot be used in the field name in react-hook-form
           imageIpfsCid: cid,
           imageMimeType: mimeType,
           name: nameWithoutExtension,
@@ -193,7 +195,7 @@ const UploadImagesPage = () => {
           </Button>
         )}
 
-        {nftsData && nftsData.length > 0 && (
+        {nftsData && Object.keys(nftsData).length > 0 && (
           <Stack mt={3}>
             <Stack
               spacing={2}
@@ -207,8 +209,8 @@ const UploadImagesPage = () => {
                 Images uploaded successfully
               </Label>
               <Grid2 container spacing={4}>
-                {nftsData.map(({imageIpfsCid, name}) => (
-                  <Grid2 key={imageIpfsCid} size={4}>
+                {Object.values(nftsData).map(({id, imageIpfsCid, name}) => (
+                  <Grid2 key={id} size={4}>
                     <NFTImagePreview
                       image={ipfsCidToHttps(imageIpfsCid)}
                       cid={imageIpfsCid}
@@ -227,6 +229,8 @@ const UploadImagesPage = () => {
           </Stack>
         )}
       </Paper>
+
+      <DeleteCollection />
     </Page>
   )
 }

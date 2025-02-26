@@ -1,4 +1,4 @@
-import {uniqBy} from 'lodash'
+import {keyBy, omit} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
 import {create} from 'zustand'
 import {persist} from 'zustand/middleware'
@@ -10,6 +10,7 @@ export enum CollectionStateStep {
 }
 
 export type NFTData = {
+  id: string // only for React purposes
   imageIpfsCid: string
   imageMimeType: string
   name: string
@@ -22,12 +23,13 @@ export type CollectionState = {
   uuid?: string
   website?: string
   mintEndDate?: number
-  nftsData?: NFTData[]
+  nftsData?: Record<string, NFTData>
   isRehydrated?: boolean
 
   setCollectionData: (data: {website: string; mintEndDate?: number}) => void
   addNewNFTsData: (nftsData: NFTData[]) => void
-  setNFTsData: (data: NFTData[]) => void
+  setNFTsData: (data: Record<string, NFTData>) => void
+  deleteNFT: (id: string) => void
   reset: () => void
 }
 
@@ -56,10 +58,10 @@ export const useCollectionStore = create<CollectionState>()(
             nftsData: existingNFTsData,
             lastSubmittedStep: existingLastSubmittedStep,
           }) => ({
-            nftsData: uniqBy(
-              [...(existingNFTsData ?? []), ...nftsData],
-              (i) => i.imageIpfsCid,
-            ),
+            nftsData: {
+              ...(existingNFTsData ?? {}),
+              ...keyBy(nftsData, (nft) => nft.id),
+            },
             lastSubmittedStep: Math.max(
               existingLastSubmittedStep ?? 0,
               CollectionStateStep.UPLOAD_IMAGES,
@@ -74,13 +76,28 @@ export const useCollectionStore = create<CollectionState>()(
             CollectionStateStep.NFTS_DATA,
           ),
         })),
+      deleteNFT: (id) =>
+        set(({nftsData: existingNFTsData}) => {
+          if (!existingNFTsData) return {}
+
+          const newNftsData = omit(existingNFTsData, id)
+
+          return {
+            nftsData: newNftsData,
+            ...(Object.keys(newNftsData).length === 0
+              ? {
+                  lastSubmittedStep: CollectionStateStep.COLLECTION_DATA,
+                }
+              : {}),
+          }
+        }),
       reset: () =>
         set({
           lastSubmittedStep: undefined,
           uuid: undefined,
           website: undefined,
           mintEndDate: undefined,
-          nftsData: [],
+          nftsData: undefined,
         }),
     }),
     {
