@@ -114,6 +114,7 @@ export const useCollectionStore = create<CollectionState>()(
           if (state) state.isRehydrated = true
         }
       },
+      partialize: (state) => omit(state, 'isRehydrated'),
     },
   ),
 )

@@ -1,3 +1,4 @@
+import {stringToHex} from '@meshsdk/core'
 import {
   Dialog,
   DialogActions,
@@ -22,11 +23,14 @@ import {getErrorMessage} from '../../helpers/forms'
 import {ipfsCidToHttps} from '../../helpers/ipfs'
 import type {NFTsDataInputs} from './types'
 
+const MAX_ASSET_NAME_HEX_LENGTH = 64
+
 type NFTDataInputProps = {
   id: string
   control: Control<NFTsDataInputs>
   register: UseFormRegister<NFTsDataInputs>
   onDelete?: () => void
+  onDuplicate?: () => void
 }
 
 export const NFTDataInput = ({
@@ -34,6 +38,7 @@ export const NFTDataInput = ({
   control,
   register,
   onDelete,
+  onDuplicate,
 }: NFTDataInputProps) => {
   const name = useWatch({control, name: `nftsData.${id}.name`})
   const imageIpfsCid = useWatch({control, name: `nftsData.${id}.imageIpfsCid`})
@@ -63,9 +68,12 @@ export const NFTDataInput = ({
             height={200}
           />
 
-          <TextButton onClick={() => setIsDeleteConfirmModalOpen(true)}>
-            Delete
-          </TextButton>
+          <Stack direction="row" spacing={0.5} alignItems="center">
+            <TextButton onClick={() => setIsDeleteConfirmModalOpen(true)}>
+              Delete
+            </TextButton>
+            <TextButton onClick={onDuplicate}>Duplicate</TextButton>
+          </Stack>
         </Stack>
 
         <Stack flex={1} spacing={4}>
@@ -77,6 +85,12 @@ export const NFTDataInput = ({
             <InputField
               {...register(`nftsData.${id}.assetNameUtf8`, {
                 required: true,
+                validate: (value) => {
+                  if (stringToHex(value).length > MAX_ASSET_NAME_HEX_LENGTH) {
+                    return `Asset name is too long. When converted to a HEX string, it cannot be longer than ${MAX_ASSET_NAME_HEX_LENGTH} characters`
+                  }
+                  return true
+                },
               })}
             />
           </FormField>
@@ -84,6 +98,7 @@ export const NFTDataInput = ({
           <FormField
             label="NFT name"
             error={getErrorMessage(errors.nftsData?.[id]?.name)}
+            tooltip="Enter the name of your NFT which will be encoded in the NFT metadata."
           >
             <InputField
               {...register(`nftsData.${id}.name`, {
@@ -92,15 +107,23 @@ export const NFTDataInput = ({
             />
           </FormField>
 
-          <FormField label="NFT description" isOptional>
+          <FormField
+            label="NFT description"
+            isOptional
+            tooltip="Enter the description of your NFT which will be encoded in the NFT metadata."
+          >
             <InputField {...register(`nftsData.${id}.description`)} />
           </FormField>
 
           <Stack direction="row" alignItems="center" spacing={4}>
-            <FormField label="IPFS image" sx={{flex: 1}}>
+            <FormField
+              label="IPFS image"
+              sx={{flex: 1}}
+              tooltip="Hash of the IPFS image"
+            >
               <Paragraph>{imageIpfsCid}</Paragraph>
             </FormField>
-            <FormField label="Image type">
+            <FormField label="Image type" tooltip="MIME type of the IPFS image">
               <Paragraph>{imageMimeType}</Paragraph>
             </FormField>
           </Stack>

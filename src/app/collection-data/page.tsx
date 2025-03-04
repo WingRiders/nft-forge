@@ -148,6 +148,7 @@ const CollectionDataPage = () => {
             label="Website"
             error={getErrorMessage(errors.website)}
             isOptional
+            tooltip="Enter the link to your website. It will be encoded in the metadata for each NFT."
           >
             <InputField
               {...register('website', {

@@ -11,6 +11,7 @@ import {
 import type BigNumber from 'bignumber.js'
 import {addMinutes, isBefore} from 'date-fns'
 import {isCollateralUtxo} from '../../helpers/collateral'
+import {prepareMetadatumForTx} from '../../helpers/metadata'
 import {getTxFee} from '../../helpers/transaction'
 import {walletNetworkIdToNetwork} from '../../helpers/wallet'
 import {applyParamsToMinterScript} from '../../onChain/mint'
@@ -126,7 +127,7 @@ export const buildMintTx = async ({
     },
   )
 
-  txBuilder.metadataValue(721, metadata)
+  txBuilder.metadataValue(721, prepareMetadatumForTx(metadata))
 
   const builtTx = await txBuilder.complete()
   const txFee = await getTxFee(builtTx)

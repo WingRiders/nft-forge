@@ -6,6 +6,7 @@ import {AxiosError} from 'axios'
 import {uniqBy} from 'lodash'
 import {useState} from 'react'
 import Dropzone, {type DropzoneProps, type FileRejection} from 'react-dropzone'
+import {v4 as uuidV4} from 'uuid'
 import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
 import {MintStepper} from '../../components/MintStepper'
@@ -57,7 +58,7 @@ const UploadImagesPage = () => {
       uploadedImages.map(({cid, name, mimeType}) => {
         const nameWithoutExtension = name.split('.').slice(0, -1).join('.')
         return {
-          id: name.replace('.', '-'), // '.' cannot be used in the field name in react-hook-form
+          id: uuidV4(),
           imageIpfsCid: cid,
           imageMimeType: mimeType,
           name: nameWithoutExtension,

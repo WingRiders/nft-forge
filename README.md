@@ -2,6 +2,8 @@
 
 NFT metadata editor and minting tool for Cardano, enabling bulk NFT creation, metadata customization & integrity checks and seamless IPFS image upload.
 
+Smart contracts can be found in https://github.com/WingRiders/minter-aiken.
+
 ## Architecture
 
 Architecture of the project can be found in the [architecture.md](./docs/architecture.md) document.
