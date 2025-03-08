@@ -23,10 +23,11 @@ import {
 import {formatDateTime} from '../../helpers/formatDate'
 import {getErrorMessage} from '../../helpers/forms'
 import {applyParamsToMinterScript} from '../../onChain/mint'
-import {useCollectionStore} from '../../store/collection'
+import {type CustomFieldDef, useCollectionStore} from '../../store/collection'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
 import {MintStep} from '../../types'
 import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
+import {CustomFieldsInput} from './CustomFieldsInput'
 
 const WEBSITE_URL_PATTERN =
   /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/
@@ -39,10 +40,11 @@ enum CollectionDataTab {
   EXISTING_COLLECTION = 1,
 }
 
-type CollectionDataInputs = {
+export type CollectionDataInputs = {
   existingCollectionId?: string
   website: string
   mintEndDate: number | null
+  customFieldsDefs: CustomFieldDef[]
 }
 
 const CollectionDataPage = () => {
@@ -64,13 +66,21 @@ const CollectionDataPage = () => {
     existingCollectionId: existingCollectionIdInStore,
     website: websiteInStore,
     mintEndDate: mintEndDateInStore,
+    customFieldsDefs: customFieldsDefsInStore,
   } = useCollectionStore(
     useShallow(
-      ({setCollectionData, existingCollectionId, website, mintEndDate}) => ({
+      ({
         setCollectionData,
         existingCollectionId,
         website,
         mintEndDate,
+        customFieldsDefs,
+      }) => ({
+        setCollectionData,
+        existingCollectionId,
+        website,
+        mintEndDate,
+        customFieldsDefs,
       }),
     ),
   )
@@ -95,6 +105,7 @@ const CollectionDataPage = () => {
       existingCollectionId: existingCollectionIdInStore,
       website: websiteInStore,
       mintEndDate: mintEndDateInStore,
+      customFieldsDefs: customFieldsDefsInStore,
     },
   })
 
@@ -118,6 +129,7 @@ const CollectionDataPage = () => {
     existingCollectionId,
     website,
     mintEndDate,
+    customFieldsDefs,
   }) => {
     if (existingCollectionId) {
       if (!decodedExistingCollectionId) return
@@ -128,9 +140,14 @@ const CollectionDataPage = () => {
         uuid: decodedExistingCollectionId.fields.uuid,
         mintEndDate:
           mintEndDate ?? decodedExistingCollectionId.fields.mintEndDate,
+        customFieldsDefs,
       })
     } else {
-      setCollectionData({website, mintEndDate: mintEndDate ?? undefined})
+      setCollectionData({
+        website,
+        mintEndDate: mintEndDate ?? undefined,
+        customFieldsDefs,
+      })
     }
     router.push('/upload-images')
   }
@@ -161,6 +178,8 @@ const CollectionDataPage = () => {
               placeholder="Enter link to your website"
             />
           </FormField>
+
+          <CustomFieldsInput control={control} register={register} />
 
           <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
             <Tabs

@@ -9,7 +9,14 @@ type NFTDisplayProps = {
 }
 
 export const NFTDisplay = ({
-  nftData: {imageIpfsCid, imageMimeType, name, assetNameUtf8, description},
+  nftData: {
+    imageIpfsCid,
+    imageMimeType,
+    name,
+    assetNameUtf8,
+    description,
+    customFields,
+  },
 }: NFTDisplayProps) => {
   return (
     <Stack direction="row" alignItems="center" spacing={5}>
@@ -35,6 +42,13 @@ export const NFTDisplay = ({
         <FormField label="NFT description">
           <Paragraph>{description || <i>(No description)</i>}</Paragraph>
         </FormField>
+
+        {customFields &&
+          Object.entries(customFields).map(([name, value]) => (
+            <FormField key={name} label={name}>
+              <Paragraph>{value || <i>(No value)</i>}</Paragraph>
+            </FormField>
+          ))}
 
         <Stack direction="row" alignItems="center" spacing={4}>
           <FormField label="IPFS image" sx={{flex: 1}}>

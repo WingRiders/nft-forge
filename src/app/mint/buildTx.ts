@@ -10,6 +10,7 @@ import {
 
 import type BigNumber from 'bignumber.js'
 import {addMinutes, isBefore} from 'date-fns'
+import {omitBy} from 'lodash'
 import {isCollateralUtxo} from '../../helpers/collateral'
 import {prepareMetadatumForTx} from '../../helpers/metadata'
 import {getTxFee} from '../../helpers/transaction'
@@ -109,7 +110,14 @@ export const buildMintTx = async ({
 
   metadata[policyId] = {}
   Object.values(collection.nftsData).forEach(
-    ({name, description, imageIpfsCid, imageMimeType, assetNameUtf8}) => {
+    ({
+      name,
+      description,
+      imageIpfsCid,
+      imageMimeType,
+      assetNameUtf8,
+      customFields,
+    }) => {
       const assetNameHex = stringToHex(assetNameUtf8)
       metadata[policyId][assetNameHex] = {
         name,
@@ -117,6 +125,7 @@ export const buildMintTx = async ({
         ...(collection.website ? {Website: collection.website} : {}),
         image: `ipfs://${imageIpfsCid}`,
         mediaType: imageMimeType,
+        ...omitBy(customFields, (value) => !value),
       }
 
       txBuilder

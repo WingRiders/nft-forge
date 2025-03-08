@@ -1,4 +1,4 @@
-import {keyBy, omit} from 'lodash'
+import {keyBy, mapValues, omit, omitBy} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
 import {create} from 'zustand'
 import {persist} from 'zustand/middleware'
@@ -16,6 +16,14 @@ export type NFTData = {
   name: string
   assetNameUtf8: string
   description?: string
+  customFields?: {
+    [customFieldName: string]: string | undefined
+  }
+}
+
+export type CustomFieldDef = {
+  name: string
+  isRequired: boolean
 }
 
 export type CollectionState = {
@@ -26,12 +34,14 @@ export type CollectionState = {
   mintEndDate?: number
   nftsData?: Record<string, NFTData>
   isRehydrated?: boolean
+  customFieldsDefs?: CustomFieldDef[]
 
   setCollectionData: (data: {
     existingCollectionId?: string
     uuid?: string
     website?: string
     mintEndDate?: number
+    customFieldsDefs?: CustomFieldDef[]
   }) => void
   addNewNFTsData: (nftsData: NFTData[]) => void
   setNFTsData: (data: Record<string, NFTData>) => void
@@ -41,8 +51,9 @@ export type CollectionState = {
 
 export const useCollectionStore = create<CollectionState>()(
   persist(
-    (set) => ({
-      setCollectionData: ({uuid: newUuid, ...commonData}) => {
+    (set, get) => ({
+      setCollectionData: ({uuid: newUuid, customFieldsDefs, ...commonData}) => {
+        const existingNFTsData = get().nftsData
         return set(
           ({
             uuid: existingUuid,
@@ -55,6 +66,24 @@ export const useCollectionStore = create<CollectionState>()(
               existingLastSubmittedStep ?? 0,
               CollectionStateStep.COLLECTION_DATA,
             ),
+            customFieldsDefs,
+            nftsData: !existingNFTsData
+              ? undefined
+              : !customFieldsDefs
+                ? existingNFTsData
+                : mapValues(existingNFTsData, (nftData) => ({
+                    ...nftData,
+                    customFields: !nftData.customFields
+                      ? undefined
+                      : // remove custom fields from the NFT data that are not in the custom fields defs of the collection
+                        omitBy(
+                          nftData.customFields,
+                          (_value, key) =>
+                            !customFieldsDefs.some(
+                              (field) => field.name === key,
+                            ),
+                        ),
+                  })),
           }),
         )
       },
@@ -105,6 +134,7 @@ export const useCollectionStore = create<CollectionState>()(
           website: undefined,
           mintEndDate: undefined,
           nftsData: undefined,
+          customFieldsDefs: undefined,
         }),
     }),
     {

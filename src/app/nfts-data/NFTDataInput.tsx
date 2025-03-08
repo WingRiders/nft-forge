@@ -21,6 +21,7 @@ import {Label} from '../../components/Typography/Label'
 import {Paragraph} from '../../components/Typography/Paragraph'
 import {getErrorMessage} from '../../helpers/forms'
 import {ipfsCidToHttps} from '../../helpers/ipfs'
+import type {CustomFieldDef} from '../../store/collection'
 import type {NFTsDataInputs} from './types'
 
 const MAX_ASSET_NAME_HEX_LENGTH = 64
@@ -29,6 +30,7 @@ type NFTDataInputProps = {
   id: string
   control: Control<NFTsDataInputs>
   register: UseFormRegister<NFTsDataInputs>
+  customFieldsDefs?: CustomFieldDef[]
   onDelete?: () => void
   onDuplicate?: () => void
 }
@@ -37,6 +39,7 @@ export const NFTDataInput = ({
   id,
   control,
   register,
+  customFieldsDefs,
   onDelete,
   onDuplicate,
 }: NFTDataInputProps) => {
@@ -114,6 +117,26 @@ export const NFTDataInput = ({
           >
             <InputField {...register(`nftsData.${id}.description`)} />
           </FormField>
+
+          {customFieldsDefs?.map((customField) => (
+            <FormField
+              key={customField.name}
+              label={customField.name}
+              error={getErrorMessage(
+                errors.nftsData?.[id]?.customFields?.[customField.name],
+              )}
+              isOptional={!customField.isRequired}
+            >
+              <InputField
+                {...register(
+                  `nftsData.${id}.customFields.${customField.name}`,
+                  {
+                    required: customField.isRequired,
+                  },
+                )}
+              />
+            </FormField>
+          ))}
 
           <Stack direction="row" alignItems="center" spacing={4}>
             <FormField

@@ -40,6 +40,9 @@ Creating a new collection:
 Minting additional NFTs in an existing collection:
 ![Collection data - existing collection](assets/design/collection-data-existing-collection.png)
 
+For each collection, you can define your own custom metadata fields:
+![Custom metadata fields](assets/design/collection-data-custom-fields.png)
+
 ## Upload NFT images
 
 The next step is to upload images for your NFTs. You can either drag and drop the files into the designated area or click to upload them manually using the file explorer.

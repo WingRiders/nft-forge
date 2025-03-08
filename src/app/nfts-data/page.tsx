@@ -22,14 +22,24 @@ import type {NFTsDataInputs} from './types'
 const NFTsDataPage = () => {
   const router = useRouter()
 
-  const {nftsData, addNewNFTsData, setNFTsData, deleteNFT} = useCollectionStore(
-    useShallow(({nftsData, addNewNFTsData, setNFTsData, deleteNFT}) => ({
-      nftsData,
-      addNewNFTsData,
-      setNFTsData,
-      deleteNFT,
-    })),
-  )
+  const {nftsData, customFieldsDefs, addNewNFTsData, setNFTsData, deleteNFT} =
+    useCollectionStore(
+      useShallow(
+        ({
+          nftsData,
+          customFieldsDefs,
+          addNewNFTsData,
+          setNFTsData,
+          deleteNFT,
+        }) => ({
+          nftsData,
+          customFieldsDefs,
+          addNewNFTsData,
+          setNFTsData,
+          deleteNFT,
+        }),
+      ),
+    )
 
   const [isFormInitialized, setIsFormInitialized] = useState(false)
 
@@ -77,6 +87,7 @@ const NFTsDataPage = () => {
       description: existingNftData.description,
       imageIpfsCid: existingNftData.imageIpfsCid,
       imageMimeType: existingNftData.imageMimeType,
+      customFields: existingNftData.customFields,
     }
 
     // duplicate in the store
@@ -105,6 +116,7 @@ const NFTsDataPage = () => {
                   id={nftData.id}
                   control={control}
                   register={register}
+                  customFieldsDefs={customFieldsDefs}
                   onDelete={() => handleDeleteNFT(nftData.id)}
                   onDuplicate={() => handleDuplicateNFT(nftData.id)}
                 />
