@@ -1,3 +1,4 @@
+import {stringToHex} from '@meshsdk/core'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {Box, Button, FormControlLabel, Stack, Switch} from '@mui/material'
@@ -23,6 +24,8 @@ const RESERVED_FIELDS_NAMES = [
 ]
 
 const FIELD_NAME_REGEX = /^[a-zA-Z0-9 _:-]+$/
+
+const MAX_FIELD_NAME_HEX_LENGTH = 64
 
 type CustomFieldsInputProps = {
   control: Control<CollectionDataInputs>
@@ -81,6 +84,11 @@ export const CustomFieldsInput = ({
                       validate: (value) => {
                         if (RESERVED_FIELDS_NAMES.includes(value)) {
                           return 'This field name is reserved, please choose another name.'
+                        }
+                        if (
+                          stringToHex(value).length > MAX_FIELD_NAME_HEX_LENGTH
+                        ) {
+                          return `Field name is too long. When converted to a HEX string, it cannot be longer than ${MAX_FIELD_NAME_HEX_LENGTH} characters.`
                         }
                         if (!FIELD_NAME_REGEX.test(value)) {
                           return 'Field name can only contain letters, numbers, underscores, hyphens, colons, and spaces.'
