@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT}
+      - IPFS_PROTOCOL=${IPFS_PROTOCOL}
+      - IPFS_HOST=${IPFS_HOST}
+      - IPFS_PORT=${IPFS_PORT}
+      - IPFS_AUTH=${IPFS_AUTH}
