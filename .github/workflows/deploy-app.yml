@@ -1,0 +1,24 @@
+name: 'Deploy App'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency: app
+
+jobs:
+  deploy:
+    if: github.repository == 'WingRiders/nft-forge'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: mainnet
+      service: nft-forge
+      deploy: true
+      working_directory: .
+      dockerfile: ./Dockerfile
+    secrets:
+      aws-region: ${{ secrets.AWS_REGION }}
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
