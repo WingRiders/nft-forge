@@ -2,6 +2,12 @@ FROM oven/bun:1.2.3 AS builder
 
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY package.json bun.lockb next.config.ts tsconfig.json declarations.d.ts ./
 
 COPY src/ ./src/
