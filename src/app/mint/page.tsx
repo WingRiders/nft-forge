@@ -5,7 +5,7 @@ import {Alert, AlertTitle, Divider, Stack} from '@mui/material'
 import {type QueryFunction, useQuery} from '@tanstack/react-query'
 import {useRouter} from 'next/navigation'
 import pluralize from 'pluralize'
-import {Fragment} from 'react'
+import {Fragment, useState} from 'react'
 import {useShallow} from 'zustand/shallow'
 import {Button} from '../../components/Buttons/Button'
 import {FormField} from '../../components/FormField'
@@ -41,6 +41,8 @@ const buildMintTxQueryFn: QueryFunction<
 const MintPage = () => {
   const router = useRouter()
 
+  const [hasMintingEnded, setHasMintingEnded] = useState(false)
+
   const {wallet} = useConnectedWalletStore(
     useShallow(({connectedWallet}) => ({wallet: connectedWallet?.wallet})),
   )
@@ -58,6 +60,7 @@ const MintPage = () => {
     gcTime: 0,
     staleTime: 0,
     refetchOnMount: true,
+    enabled: !hasMintingEnded,
   })
 
   const {
@@ -77,6 +80,7 @@ const MintPage = () => {
   }
 
   const handleSuccessModalClose = () => {
+    setHasMintingEnded(true)
     collection.reset()
     resetSignAndSubmitTx()
     router.push('/')
