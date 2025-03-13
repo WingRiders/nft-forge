@@ -2,12 +2,6 @@ FROM oven/bun:1.2.3 AS builder
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y wget && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 COPY package.json bun.lockb next.config.ts tsconfig.json declarations.d.ts ./
 
 COPY src/ ./src/
@@ -21,6 +15,12 @@ RUN bun run build
 RUN bun install --production --frozen-lockfile
 
 FROM oven/bun:1.2.3-slim
+
+# Install wget
+RUN apt-get update && \
+    apt-get install -y wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
