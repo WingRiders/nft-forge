@@ -9,6 +9,11 @@ export enum CollectionStateStep {
   NFTS_DATA = 2,
 }
 
+export enum CollectionStandard {
+  CIP_25 = 'CIP-25',
+  CIP_68 = 'CIP-68',
+}
+
 export type NFTData = {
   id: string // only for React purposes
   imageIpfsCid: string
@@ -32,6 +37,7 @@ export type CollectionState = {
   uuid?: string
   website?: string
   mintEndDate?: number
+  standard?: CollectionStandard
   nftsData?: Record<string, NFTData>
   isRehydrated?: boolean
   customFieldsDefs?: CustomFieldDef[]
@@ -41,6 +47,7 @@ export type CollectionState = {
     uuid?: string
     website?: string
     mintEndDate?: number
+    standard: CollectionStandard
     customFieldsDefs?: CustomFieldDef[]
   }) => void
   addNewNFTsData: (nftsData: NFTData[]) => void
@@ -133,6 +140,7 @@ export const useCollectionStore = create<CollectionState>()(
           uuid: undefined,
           website: undefined,
           mintEndDate: undefined,
+          standard: undefined,
           nftsData: undefined,
           customFieldsDefs: undefined,
         }),

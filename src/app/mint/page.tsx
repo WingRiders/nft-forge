@@ -17,7 +17,11 @@ import {Paragraph} from '../../components/Typography/Paragraph'
 import {formatAdaQuantity} from '../../helpers/formatAssetQuantity'
 import {formatDateTime} from '../../helpers/formatDate'
 import {useSignAndSubmitTxMutation} from '../../helpers/transaction'
-import {type CollectionState, useCollectionStore} from '../../store/collection'
+import {
+  CollectionStandard,
+  type CollectionState,
+  useCollectionStore,
+} from '../../store/collection'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
 import {MintStep} from '../../types'
 import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
@@ -97,6 +101,11 @@ const MintPage = () => {
         <Paper title="Mint">
           <Heading variant="h3">Collection data</Heading>
           <Stack spacing={2} mt={2}>
+            <FormField label="Minting standard">
+              <Paragraph>
+                {collection.standard || CollectionStandard.CIP_25}
+              </Paragraph>
+            </FormField>
             <FormField label="Website">
               <Paragraph>{collection.website || <i>(Not set)</i>}</Paragraph>
             </FormField>

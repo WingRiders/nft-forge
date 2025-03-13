@@ -1,7 +1,16 @@
 'use client'
 
 import {deserializeAddress, resolveScriptHash} from '@meshsdk/core'
-import {Box, FormControlLabel, Stack, Switch, Tab, Tabs} from '@mui/material'
+import {
+  Box,
+  FormControlLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Switch,
+  Tab,
+  Tabs,
+} from '@mui/material'
 import {DateTimePicker} from '@mui/x-date-pickers'
 import {addMinutes, hoursToMinutes, isBefore, isPast} from 'date-fns'
 import {useRouter} from 'next/navigation'
@@ -23,7 +32,11 @@ import {
 import {formatDateTime} from '../../helpers/formatDate'
 import {getErrorMessage} from '../../helpers/forms'
 import {applyParamsToMinterScript} from '../../onChain/mint'
-import {type CustomFieldDef, useCollectionStore} from '../../store/collection'
+import {
+  CollectionStandard,
+  type CustomFieldDef,
+  useCollectionStore,
+} from '../../store/collection'
 import {useConnectedWalletStore} from '../../store/connectedWallet'
 import {MintStep} from '../../types'
 import {MintFlowNavigationRedirect} from '../MintFlowNavigationRedirect'
@@ -45,6 +58,7 @@ export type CollectionDataInputs = {
   website: string
   mintEndDate: number | null
   customFieldsDefs: CustomFieldDef[]
+  standard: CollectionStandard
 }
 
 const CollectionDataPage = () => {
@@ -67,6 +81,7 @@ const CollectionDataPage = () => {
     website: websiteInStore,
     mintEndDate: mintEndDateInStore,
     customFieldsDefs: customFieldsDefsInStore,
+    standard: standardInStore,
   } = useCollectionStore(
     useShallow(
       ({
@@ -75,12 +90,14 @@ const CollectionDataPage = () => {
         website,
         mintEndDate,
         customFieldsDefs,
+        standard,
       }) => ({
         setCollectionData,
         existingCollectionId,
         website,
         mintEndDate,
         customFieldsDefs,
+        standard,
       }),
     ),
   )
@@ -106,6 +123,7 @@ const CollectionDataPage = () => {
       website: websiteInStore,
       mintEndDate: mintEndDateInStore,
       customFieldsDefs: customFieldsDefsInStore,
+      standard: standardInStore ?? CollectionStandard.CIP_25,
     },
   })
 
@@ -130,6 +148,7 @@ const CollectionDataPage = () => {
     website,
     mintEndDate,
     customFieldsDefs,
+    standard,
   }) => {
     if (existingCollectionId) {
       if (!decodedExistingCollectionId) return
@@ -141,12 +160,14 @@ const CollectionDataPage = () => {
         mintEndDate:
           mintEndDate ?? decodedExistingCollectionId.fields.mintEndDate,
         customFieldsDefs,
+        standard,
       })
     } else {
       setCollectionData({
         website,
         mintEndDate: mintEndDate ?? undefined,
         customFieldsDefs,
+        standard,
       })
     }
     router.push('/upload-images')
@@ -161,6 +182,34 @@ const CollectionDataPage = () => {
 
       <Paper title="Collection data">
         <Stack spacing={5}>
+          <FormField
+            label="Minting standard"
+            error={getErrorMessage(errors.standard)}
+            tooltip="Choose the minting standard for your collection. CIP-25 stores the NFTs data in the transaction metadata, while CIP-68 stores them in a UTxO datum."
+          >
+            <Controller
+              control={control}
+              name="standard"
+              render={({field}) => (
+                <Select
+                  label="Age"
+                  {...field}
+                  sx={({palette}) => ({
+                    bgcolor: palette.background.paper,
+                    borderRadius: 0,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'unset',
+                    },
+                  })}
+                >
+                  <MenuItem value={CollectionStandard.CIP_25}>CIP-25</MenuItem>
+                  <MenuItem value={CollectionStandard.CIP_68}>CIP-68</MenuItem>
+                </Select>
+              )}
+              rules={{required: true}}
+            />
+          </FormField>
+
           <FormField
             label="Website"
             error={getErrorMessage(errors.website)}

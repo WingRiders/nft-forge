@@ -1,10 +1,14 @@
 import {
   type BrowserWallet,
+  CIP68_100,
+  CIP68_222,
   MeshTxBuilder,
   OfflineFetcher,
   deserializeAddress,
+  metadataToCip68,
   resolveScriptHash,
   resolveSlotNo,
+  serializePlutusScript,
   stringToHex,
 } from '@meshsdk/core'
 
@@ -16,14 +20,14 @@ import {prepareMetadatumForTx} from '../../helpers/metadata'
 import {getTxFee} from '../../helpers/transaction'
 import {walletNetworkIdToNetwork} from '../../helpers/wallet'
 import {applyParamsToMinterScript} from '../../onChain/mint'
-import type {CollectionState} from '../../store/collection'
+import {CollectionStandard, type CollectionState} from '../../store/collection'
 
 const VALIDITY_END_OFFSET_MINUTES = 30
 
 type BuildMintTxArgs = {
   collection: Pick<
     CollectionState,
-    'uuid' | 'website' | 'mintEndDate' | 'nftsData'
+    'uuid' | 'website' | 'mintEndDate' | 'nftsData' | 'standard'
   >
   wallet: BrowserWallet
   now?: Date // if not provided, the current date will be used
@@ -57,8 +61,10 @@ export const buildMintTx = async ({
     throw new Error('No collateral UTxO found')
   }
 
+  const standard = collection.standard ?? CollectionStandard.CIP_25
   const changeAddress = await wallet.getChangeAddress()
-  const network = walletNetworkIdToNetwork(await wallet.getNetworkId())
+  const networkId = await wallet.getNetworkId()
+  const network = walletNetworkIdToNetwork(networkId)
   let txValidityEndTime = addMinutes(now, VALIDITY_END_OFFSET_MINUTES).getTime()
   if (collection.mintEndDate) {
     txValidityEndTime = Math.min(txValidityEndTime, collection.mintEndDate)
@@ -76,6 +82,11 @@ export const buildMintTx = async ({
     endDate: collection.mintEndDate,
   })
   const policyId = resolveScriptHash(minterScript, 'V3')
+  const scriptAddress = serializePlutusScript(
+    {version: 'V3', code: minterScript},
+    undefined,
+    networkId,
+  ).address
 
   const fetcher = new OfflineFetcher()
   fetcher.addUTxOs(utxos)
@@ -127,16 +138,45 @@ export const buildMintTx = async ({
         mediaType: imageMimeType,
         ...omitBy(customFields, (value) => !value),
       }
+    },
+  )
 
+  if (standard === CollectionStandard.CIP_25) {
+    Object.values(collection.nftsData).forEach(({assetNameUtf8}) => {
+      const assetNameHex = stringToHex(assetNameUtf8)
       txBuilder
         .mintPlutusScriptV3()
         .mint('1', policyId, assetNameHex)
         .mintingScript(minterScript)
         .mintRedeemerValue([])
-    },
-  )
+    })
 
-  txBuilder.metadataValue(721, prepareMetadatumForTx(metadata))
+    txBuilder.metadataValue(721, prepareMetadatumForTx(metadata))
+  } else {
+    Object.values(collection.nftsData).forEach(({assetNameUtf8}) => {
+      const assetNameHex = stringToHex(assetNameUtf8)
+      const refNftAssetName = CIP68_100(assetNameHex)
+
+      txBuilder
+        // mint the reference NFT
+        .mintPlutusScriptV3()
+        .mint('1', policyId, refNftAssetName)
+        .mintingScript(minterScript)
+        .mintRedeemerValue([])
+        // mint the actual NFT, it is automatically sent to the change address
+        .mintPlutusScriptV3()
+        .mint('1', policyId, CIP68_222(assetNameHex))
+        .mintingScript(minterScript)
+        .mintRedeemerValue([])
+        // send the reference NFT to the script address
+        .txOut(scriptAddress, [
+          {unit: `${policyId}${refNftAssetName}`, quantity: '1'},
+        ])
+        .txOutInlineDatumValue(
+          metadataToCip68(metadata[policyId][assetNameHex]),
+        )
+    })
+  }
 
   const builtTx = await txBuilder.complete()
   const txFee = await getTxFee(builtTx)
