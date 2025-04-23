@@ -26,4 +26,4 @@ You can select between CIP-25 and CIP-68.
 
 ## Is the application deployed somewhere?
 
-Yes, you can find it here: https://nft-forge.wingriders.com/collection-data
+Yes, you can find it here: https://nft-forge.wingriders.com/
