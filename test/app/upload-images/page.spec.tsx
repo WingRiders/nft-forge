@@ -13,6 +13,15 @@ vi.mock('next/navigation', () => ({
   })),
 }))
 
+// Mock reEncodeImage to return the original file without processing
+vi.mock('../../../src/helpers/file', async () => {
+  const actual = await vi.importActual('../../../src/helpers/file')
+  return {
+    ...actual,
+    reEncodeImage: vi.fn((file: File) => Promise.resolve(file)),
+  }
+})
+
 describe('UploadImagesPage', () => {
   test('should be able to upload images', async () => {
     vi.mocked(axios.post).mockImplementationOnce(() => {

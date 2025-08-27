@@ -3,6 +3,7 @@ import type {
   ApiIpfsPinsResponse,
   ApiIpfsUploadResponse,
 } from '../api/types/ipfs'
+import {reEncodeImage} from '../helpers/file'
 
 export const fetchPins = async () => {
   const res = await axios.get('/api/ipfs/pins')
@@ -11,7 +12,9 @@ export const fetchPins = async () => {
 
 export const uploadFile = async (file: File) => {
   const formData = new FormData()
-  formData.append('file', file)
+  // strip metadata from the image
+  const reEncodedImage = await reEncodeImage(file)
+  formData.append('file', reEncodedImage)
 
   const res = await axios.post('/api/ipfs/upload', formData)
   return res.data as Promise<ApiIpfsUploadResponse>
