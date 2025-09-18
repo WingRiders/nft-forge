@@ -1,19 +1,22 @@
 Feature: Creating NFT
 
-  Scenario: Create NFT collection
-	Given User is connected with wallet
-	* Create a new NFT collection choice is picked
-	When User clicks continue
-	* User uploads his image for minting
+  Scenario: Mint an NFT
+	Given User has created collateral
+	When User connects with his wallet
+	* Wallet is shown as connected with address and network displayed
 	* User clicks continue
-	* User sets names
+	* User picks a minting standard
 	* User clicks continue
-	When User clicks mint NFT
-	* User signs transaction a wallet
-	* Window pops up with successful mint
-	* User checks box that he saved his collection ID
-	* User is redirected to Collection data screen
-	* User has new NFT in his wallet
+	* User uploads an image for minting
+	* User clicks continue
+	* User sets NFT asset name/NFT name
+	* User clicks continue
+	* Mint summary is shown
+	* User clicks mint NFT and signs transaction
+	Then Window pops up with successful mint and output data
+	* User checks box that he saved his collection ID and closes popup
+	* User is redirected to the Collection data screen
+	* User has the new NFT in his wallet
 	
   Scenario: Create NFT collection with mint end date
 	Given User is connected with wallet
